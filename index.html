@@ -106,6 +106,23 @@
   details li { margin-bottom: 0.3rem; }
   .foot { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; align-items: center; justify-content: space-between; font-size: var(--step--1); color: var(--ink-soft); }
   .linkbtn { appearance: none; font: inherit; font-size: var(--step--1); background: none; border: 0; color: var(--ink-soft); text-decoration: underline; cursor: pointer; padding: 0.3rem 0; }
+  .modebar { margin: 0 0 1rem; }
+  .battlebtn { appearance: none; font: inherit; width: 100%; text-align: left; background: var(--pen); color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 0.6rem 1rem; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.8rem; min-height: 3.2rem; font-weight: 700; font-size: var(--step-1); }
+  .battlebtn:hover { background: var(--pen-soft); }
+  .battlebtn span { font-size: var(--step--1); font-weight: 400; color: var(--ink-soft); }
+  .bview { display: grid; gap: 1rem; }
+  .bview[hidden] { display: none; }
+  .bstages { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .bbar { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
+  .bbox { flex: 1 1 8rem; background: var(--paper); border-radius: 12px; padding: 0.3rem 1rem; display: grid; text-align: center; line-height: 1.2; }
+  .bbox .bl { font-size: var(--step--1); color: var(--ink-soft); }
+  .bbox .bt, .bbox .bs, .bbox .bv { font-family: var(--font-code); font-weight: 700; font-size: clamp(2.2rem, 11vw, 3.6rem); font-variant-numeric: tabular-nums; }
+  .bbox.warn { background: var(--shu-soft); }
+  .bbox.warn .bt { color: var(--shu); }
+  .bcount { margin: 0; text-align: center; font-family: var(--font-code); font-weight: 700; font-size: clamp(5rem, 28vw, 9rem); line-height: 1.1; color: var(--leaf-deep); }
+  .bbig { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
+  .bbox.main { background: var(--pen-soft); flex-basis: 100%; }
+  .bbox.main .bv { font-size: clamp(3rem, 16vw, 5rem); }
   pre#selftest { background: var(--ink); color: #E8F5EC; border-radius: 10px; padding: 1rem; overflow-x: auto; font-size: 0.8rem; }
 </style>
 </head>
@@ -116,6 +133,8 @@
     <h1><span class="marker">データ量ドリル</span></h1>
     <p class="lede">電卓なしで解ける数値だけが出ます．式は紙に書いて，答えだけ入力しよう</p>
   </header>
+
+  <div class="modebar" id="modebar"><button type="button" class="battlebtn" id="battleBtn">対戦<span>合言葉ペア・3分．同じ合言葉・同じ段階なら，2台に同じ問題が同じ順で出ます</span></button></div>
 
   <ul class="stages" id="stages" aria-label="段階の選択"></ul>
 
@@ -162,6 +181,44 @@
       <button type="button" class="linkbtn" id="resetBtn">記録を消す</button>
     </div>
   </main>
+  <section class="panel" id="battle" hidden aria-label="対戦">
+    <div class="bview" id="bSetup">
+      <h2>対戦　合言葉ペア</h2>
+      <p style="margin:0">同じ合言葉・同じ段階なら，2台に同じ問題が同じ順で出ます．ペアで合言葉（数字4桁）を決めて，同時に始めよう．</p>
+      <div class="field"><label for="bPass">合言葉（数字4桁）</label><input id="bPass" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="1234"></div>
+      <div>
+        <p class="small-label" style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">段階</p>
+        <div class="bstages" id="bStages"></div>
+        <p class="note" style="margin:0.4rem 0 0">ラウンド1＝① 換算，ラウンド2＝② 立式，ラウンド3＝③ 文章題 が目安．段階は自由に選べます．1ラウンドは 3 分．1回目で正解 +1，誤答 −1．</p>
+      </div>
+      <p class="feedback retry" id="bErr" role="alert" hidden></p>
+      <div class="btnrow"><button type="button" class="btn" id="bStart">開始</button><button type="button" class="btn sub" id="bBack">メニューへ</button></div>
+    </div>
+    <div class="bview" id="bCount" hidden><p class="bcount" id="bCountNum" aria-live="assertive"></p><p style="margin:0;text-align:center">用意…</p></div>
+    <div class="bview" id="bPlay" hidden>
+      <div class="bbar">
+        <div class="bbox" id="bTimeBox"><span class="bl">残り時間</span><span class="bt" id="bTime">3:00</span></div>
+        <div class="bbox"><span class="bl">得点</span><span class="bs" id="bScore">0</span></div>
+      </div>
+      <section class="qbox"><div id="bQ"></div></section>
+      <form class="answer" id="bForm" autocomplete="off" novalidate>
+        <div class="fields"><div class="field"><label for="bIn">答え</label><input id="bIn" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off"><span class="unit" id="bUnit"></span></div></div>
+        <div class="btnrow"><button type="submit" class="btn">答え合わせ</button><button type="button" class="btn sub" id="bQuit">メニューへ</button><span class="enterhint">Enter キーでも答え合わせ</span></div>
+      </form>
+      <p class="feedback" id="bFb" role="status" aria-live="polite" hidden></p>
+    </div>
+    <div class="bview" id="bResult" hidden>
+      <h2>終了</h2>
+      <p style="margin:0" id="bResInfo"></p>
+      <div class="bbig">
+        <div class="bbox main"><span class="bl">得点</span><span class="bv" id="bResScore">0</span></div>
+        <div class="bbox"><span class="bl">正解</span><span class="bv" id="bResOk">0</span></div>
+        <div class="bbox"><span class="bl">誤答</span><span class="bv" id="bResNg">0</span></div>
+      </div>
+      <p class="note" style="margin:0">相手と見せ合おう．この結果はこの端末に保存されません．</p>
+      <div class="btnrow"><button type="button" class="btn" id="bAgain">もう一度（別の合言葉）</button><button type="button" class="btn sub" id="bMenu">メニューへ</button></div>
+    </div>
+  </section>
   <pre id="selftest" hidden></pre>
 </div>
 
@@ -170,15 +227,22 @@
 /* ============ 問題生成の核（DOM に依存しない．node で検算できる） ============ */
 var DrillCore = (function () {
   var rng = Math.random;
-  function setSeed(s) {
-    var a = s >>> 0;
-    rng = function () {
+  function makeRng(seed) {                             // mulberry32（種つき乱数）
+    var a = seed >>> 0;
+    return function () {
       a = (a + 0x6D2B79F5) >>> 0;
       var t = a;
       t = Math.imul(t ^ (t >>> 15), t | 1);
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+  }
+  function setSeed(s) { rng = makeRng(s); }
+  function hashSeed(pass, stage, i) {                  // (合言葉, 段階, 問題番号) の混合ハッシュ（FNV-1a＋最終混ぜ）
+    var str = "dsd1|" + pass + "|" + stage + "|" + i, h = 2166136261 >>> 0;
+    for (var k = 0; k < str.length; k++) { h ^= str.charCodeAt(k); h = Math.imul(h, 16777619) >>> 0; }
+    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
+    return h >>> 0;
   }
   function ri(a, b) { return a + Math.floor(rng() * (b - a + 1)); }
   function pick(arr) { return arr[Math.floor(rng() * arr.length)]; }
@@ -399,6 +463,13 @@ var DrillCore = (function () {
     throw new Error("問題を生成できない: 段階" + stage);
   }
 
+  // 対戦用：問題 i は (合言葉, 段階, i) だけから決まる．捨てて引き直す乱数も同じ種つき乱数．
+  function genSeeded(stage, pass, i) {
+    var saved = rng;
+    rng = makeRng(hashSeed(pass, stage, i));
+    try { return gen(stage, null); } finally { rng = saved; }
+  }
+
   /* ---- 模範の式（HTML） ---- */
   function modelHtml(p) {
     var h = "<h3>模範の式</h3><p class=\"formula\">" + p.formula + " " + p.unit + "</p>";
@@ -430,6 +501,52 @@ var DrillCore = (function () {
     var r = ratio(mult, div), a = frac(rhs);
     return r.n * a.d === a.n * r.d;
   }
+  function checkProblem(st, p) {                       // 1問ぶんの機械検査（失敗の理由の配列．空なら合格）
+    var bad = [];
+    p.inputs.forEach(function (inp) {
+      if (!Number.isSafeInteger(inp.ans10) || inp.ans10 <= 0) bad.push("答えが正の整数(×10)でない");
+      if (inp.ans10 % 5 !== 0 && p.kind !== "Hz→kHz") bad.push("整数かx.5でない");
+    });
+    if (!evalFormula(p.formula)) bad.push("模範の式が成り立たない: " + p.formula);
+    if (p.formula.split("＝")[1] !== fmt10(p.inputs[0].ans10)) bad.push("式の右辺と答えが不一致");
+    if (!p.explOk) bad.push("2のべき説明の検算が不一致");
+    if (["バイト", "ビット", "KB", "MB", "GB", "秒", "分", "Hz", "kHz", "枚"].indexOf(p.unit) < 0) bad.push("単位が不正: " + p.unit);
+    if (st >= 2 && p.kind !== "保存できる枚数" && p.kind !== "逆算（時間）" && p.qtext.indexOf(p.unit) < 0) bad.push("問題文に単位がない");
+    if (/\.\d\d/.test(p.formula.split("＝")[1])) bad.push("答えが小数第2位以下");
+    return bad;
+  }
+  function sig(p) { return JSON.stringify([p.qhtml, p.inputs, p.formula, p.expl, p.note, p.unit]); }
+  // 対戦の決定性：同じ種なら同じ問題列／問題 i は単独で作っても同じ／別の合言葉・段階なら別の列／全問が割り切れ検査を通る
+  function determinismTest() {
+    var passes = ["0000", "1234", "9999", "2468", "0007", "5150"], N = 200;
+    var rep = { passes: passes.length, perStage: N, checked: 0, failures: [] };
+    [1, 2, 3].forEach(function (st) {
+      passes.forEach(function (ps) {
+        var A = [], B = [], i;
+        for (i = 0; i < N; i++) A.push(genSeeded(st, ps, i));
+        for (i = 0; i < N; i++) B.push(genSeeded(st, ps, i));
+        for (i = 0; i < N; i++) {
+          rep.checked++;
+          if (sig(A[i]) !== sig(B[i])) rep.failures.push("2回の生成が不一致 st" + st + " " + ps + " i" + i);
+          var bad = checkProblem(st, A[i]); if (bad.length) rep.failures.push("検査不合格 st" + st + " " + ps + " i" + i + ": " + bad[0]);
+        }
+        [199, 57, 0, 120].forEach(function (k) {          // 後ろの番号から先に，単独で作る
+          if (sig(genSeeded(st, ps, k)) !== sig(A[k])) rep.failures.push("単独生成が不一致 st" + st + " " + ps + " i" + k);
+        });
+      });
+      for (var a = 0; a < passes.length; a++) for (var b = a + 1; b < passes.length; b++) {   // 別の合言葉
+        var diff = 0;
+        for (var k = 0; k < 50; k++) if (genSeeded(st, passes[a], k).qtext !== genSeeded(st, passes[b], k).qtext) diff++;
+        if (diff < 40) rep.failures.push("別の合言葉で列が似ている st" + st + " " + passes[a] + "/" + passes[b] + " 違い" + diff + "/50");
+      }
+    });
+    [1, 2, 3].forEach(function (a) { [1, 2, 3].forEach(function (b) {        // 別の段階
+      if (a >= b) return; var diff = 0;
+      for (var k = 0; k < 50; k++) if (genSeeded(a, "1234", k).qtext !== genSeeded(b, "1234", k).qtext) diff++;
+      if (diff < 45) rep.failures.push("別の段階で列が似ている " + a + "/" + b + " 違い" + diff + "/50");
+    }); });
+    return rep;
+  }
   function selfTest(nPer, seed) {
     if (seed !== undefined) setSeed(seed);
     var report = { n: nPer, perStage: {}, totalChecked: 0, totalFail: 0 };
@@ -437,28 +554,18 @@ var DrillCore = (function () {
       var rej0 = stats.rejects[st], fails = [], kinds = {}, last = null, nfail = 0;
       for (var i = 0; i < nPer; i++) {
         var p = gen(st, last); last = p.qtext; kinds[p.kind] = (kinds[p.kind] || 0) + 1;
-        var bad = [];
-        p.inputs.forEach(function (inp) {
-          if (!Number.isSafeInteger(inp.ans10) || inp.ans10 <= 0) bad.push("答えが正の整数(×10)でない");
-          if (inp.ans10 % 5 !== 0 && p.kind !== "Hz→kHz") bad.push("整数かx.5でない");
-        });
-        {
-          if (!evalFormula(p.formula)) bad.push("模範の式が成り立たない: " + p.formula);
-          if (p.formula.split("＝")[1] !== fmt10(p.inputs[0].ans10)) bad.push("式の右辺と答えが不一致");
-          if (!p.explOk) bad.push("2のべき説明の検算が不一致");
-          if (["バイト", "ビット", "KB", "MB", "GB", "秒", "分", "Hz", "kHz", "枚"].indexOf(p.unit) < 0) bad.push("単位が不正: " + p.unit);
-          if (st >= 2 && p.kind !== "保存できる枚数" && p.kind !== "逆算（時間）" && p.qtext.indexOf(p.unit) < 0) bad.push("問題文に単位がない");
-          if (/\.\d\d/.test(p.formula.split("＝")[1])) bad.push("答えが小数第2位以下");
-        }
+        var bad = checkProblem(st, p);
         if (bad.length) { report.totalFail++; nfail++; if (fails.length < 5) fails.push({ q: p.qtext, why: bad }); }
         report.totalChecked++;
       }
       report.perStage[st] = { generated: nPer, failures: nfail, rejectedCandidates: stats.rejects[st] - rej0, kinds: kinds, samples: fails };
     });
+    report.determinism = determinismTest();
+    report.totalFail += report.determinism.failures.length;
     return report;
   }
 
-  return { setSeed: setSeed, gen: gen, modelHtml: modelHtml, parseTenths: parseTenths, fmt10: fmt10, selfTest: selfTest,
+  return { setSeed: setSeed, gen: gen, genSeeded: genSeeded, determinismTest: determinismTest, checkProblem: checkProblem, modelHtml: modelHtml, parseTenths: parseTenths, fmt10: fmt10, selfTest: selfTest,
            evalFormula: evalFormula, TEMPL: TEMPL };
 })();
 </script>
@@ -618,12 +725,117 @@ var DrillCore = (function () {
   });
   $("nextBtn").addEventListener("click", next);
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && !e.defaultPrevented && cur && cur.done && e.target.tagName !== "BUTTON") { e.preventDefault(); next(); }
+    if (e.key === "Enter" && !e.defaultPrevented && !B.on && cur && cur.done && e.target.tagName !== "BUTTON") { e.preventDefault(); next(); }
   });
   $("resetBtn").addEventListener("click", function () {
     if (!window.confirm("この端末の記録（正解数・連続正解・クリア）を消します．よいですか．")) return;
     state = blank(); save(); lastText = null; nth = 0; newQuestion();
   });
+
+  /* ---------- 対戦モード（合言葉ペア）．個人練習の記録には触れない ---------- */
+  var ROUND = 180;
+  (function () { var m = /[?&]roundsec=(\d+)/.exec(window.location.search); if (m && +m[1] >= 3 && +m[1] <= 180) ROUND = +m[1]; })();
+  var B = { on: false, stage: 1, pass: "", i: 0, score: 0, ok: 0, ng: 0, endAt: 0, tick: null, cd: null, adv: null, fl: null, p: null, locked: false };
+  var BV = ["bSetup", "bCount", "bPlay", "bResult"];
+  function bShow(id) { BV.forEach(function (x) { $(x).hidden = x !== id; }); }
+  function bStop() { clearInterval(B.tick); clearTimeout(B.cd); clearTimeout(B.adv); clearTimeout(B.fl); B.tick = B.cd = B.adv = B.fl = null; }
+  function bNow() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
+  function bStages() {
+    var d = $("bStages"); d.innerHTML = "";
+    [1, 2, 3].forEach(function (n) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = NAMES[n];
+      b.setAttribute("aria-pressed", String(B.stage === n));
+      b.addEventListener("click", function () { B.stage = n; bStages(); });
+      d.appendChild(b);
+    });
+  }
+  function bSetup(clearPass) {
+    bStop(); B.p = null; bShow("bSetup"); $("bErr").hidden = true;
+    if (clearPass) $("bPass").value = "";
+    bStages(); $("bPass").focus();
+  }
+  function enterBattle() {
+    B.on = true;
+    $("modebar").hidden = true; $("stages").hidden = true; $("panel").hidden = true; $("battle").hidden = false;
+    bSetup(true); window.scrollTo(0, 0);
+  }
+  function leaveBattle() {
+    bStop(); B.on = false; B.p = null;
+    $("battle").hidden = true; $("modebar").hidden = false; $("stages").hidden = false; $("panel").hidden = false;
+    window.scrollTo(0, 0);
+  }
+  function normPass(v) { return String(v).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }).replace(/\s/g, ""); }
+  function bStart() {
+    var ps = normPass($("bPass").value);
+    if (!/^\d{4}$/.test(ps)) { var e = $("bErr"); e.textContent = "4桁の数字で入力しよう"; e.hidden = false; $("bPass").focus(); return; }
+    B.pass = ps; B.i = 0; B.score = 0; B.ok = 0; B.ng = 0; B.locked = false;
+    bShow("bCount");
+    var n = 3;
+    (function step() {
+      $("bCountNum").textContent = n;
+      if (n === 0) { bBegin(); return; }
+      n--; B.cd = setTimeout(step, 1000);
+    })();
+  }
+  function bBegin() {
+    $("bCountNum").textContent = "";
+    B.endAt = bNow() + ROUND * 1000;
+    bShow("bPlay"); $("bScore").textContent = "0";
+    bShowQ();
+    B.tick = setInterval(bTick, 200); bTick();
+  }
+  function bTick() {
+    if (!B.on || !B.tick) return;
+    var rem = B.endAt - bNow();
+    if (rem <= 0) { bEnd(); return; }
+    var sec = Math.ceil(rem / 1000), m = Math.floor(sec / 60), r = sec % 60;
+    $("bTime").textContent = m + ":" + (r < 10 ? "0" : "") + r;
+    $("bTimeBox").className = "bbox" + (sec <= 10 ? " warn" : "");
+  }
+  function bShowQ() {
+    clearTimeout(B.adv); clearTimeout(B.fl);
+    B.p = C.genSeeded(B.stage, B.pass, B.i); B.locked = false;
+    $("bQ").innerHTML = '<p class="qtext">' + B.p.qhtml + "</p>";
+    $("bUnit").textContent = B.p.unit;
+    var inp = $("bIn"); inp.value = ""; inp.focus({ preventScroll: true });
+    $("bFb").hidden = true;
+  }
+  function bFb(cls, msg, ms) {
+    var f = $("bFb"); f.className = "feedback " + cls; f.textContent = msg; f.hidden = false;
+    clearTimeout(B.fl); if (ms) B.fl = setTimeout(function () { f.hidden = true; }, ms);
+  }
+  function bAdvance() { if (!B.on || !B.p) return; B.i++; bShowQ(); }
+  function bSubmit() {
+    if (!B.on || !B.p) return;
+    if (B.endAt - bNow() <= 0) { bEnd(); return; }       // 時間切れ：入力中の問題は数えない
+    if (B.locked) { bAdvance(); return; }
+    var v = C.parseTenths($("bIn").value);
+    if (v === null) { bFb("retry", "数字で入力しよう（例：90 や 2.5）．単位は書かなくてよい．", 0); return; }
+    if (v === B.p.inputs[0].ans10) {
+      B.score++; B.ok++; $("bScore").textContent = B.score;
+      B.i++; bShowQ(); bFb("ok", "正解！ +1", 700);
+    } else {
+      B.score--; B.ng++; $("bScore").textContent = B.score; B.locked = true;
+      bFb("ng", "誤答 −1．答えは " + C.fmt10(B.p.inputs[0].ans10) + " " + B.p.unit + "　式：" + B.p.formula + " " + B.p.unit, 0);
+      B.adv = setTimeout(bAdvance, 2000);
+    }
+  }
+  function bEnd() {
+    bStop(); B.p = null;
+    $("bResInfo").textContent = "合言葉 " + B.pass + "　" + NAMES[B.stage] + "　" + ROUND + " 秒";
+    $("bResScore").textContent = B.score; $("bResOk").textContent = B.ok; $("bResNg").textContent = B.ng;
+    bShow("bResult");
+  }
+  $("battleBtn").addEventListener("click", enterBattle);
+  $("bBack").addEventListener("click", leaveBattle);
+  $("bQuit").addEventListener("click", leaveBattle);
+  $("bMenu").addEventListener("click", leaveBattle);
+  $("bAgain").addEventListener("click", function () { bSetup(true); });
+  $("bStart").addEventListener("click", bStart);
+  $("bPass").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); bStart(); } });
+  $("bForm").addEventListener("submit", function (e) { e.preventDefault(); bSubmit(); });
+  $("bIn").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); bSubmit(); } });
+  document.addEventListener("visibilitychange", function () { if (B.on && B.tick) bTick(); });
 
   var qs = window.location.search;
   if (/[?&]selftest=1/.test(qs)) {
@@ -634,7 +846,7 @@ var DrillCore = (function () {
 
   state = load();
   newQuestion();
-  window.__drill = { state: function () { return state; }, cur: function () { return cur; } };
+  window.__drill = { state: function () { return state; }, cur: function () { return cur; }, battle: function () { return B; } };
 })();
 </script>
 </body>
