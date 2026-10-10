@@ -111,7 +111,7 @@
   .battlebtn:hover { background: var(--pen-soft); }
   .battlebtn span { font-size: var(--step--1); font-weight: 400; color: var(--ink-soft); }
   #bFb { min-height: 6.8rem; margin: 0; overflow-wrap: anywhere; }
-  #bResH:focus { outline: none; }
+  #bResH:focus, #bConfH:focus { outline: none; }
   body.bplay .masthead { display: none; }                       /* 対戦中は見出しをたたみ，問題と入力欄を画面に収める */
   #bFb.off { visibility: hidden; }
   .bstages .chip { appearance: none; font: inherit; font-weight: 700; flex: 1 1 0; min-width: 0; min-height: 2.9rem; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.4rem 0.3rem; cursor: pointer; line-height: 1.3; white-space: nowrap; }
@@ -140,6 +140,10 @@
   .tlink a:hover { opacity: 1; text-decoration: underline; }
   body.tmode .lede { display: none; }
   body.tmode .page { max-width: 84rem; }
+  body.tmode .masthead { padding: 0.8rem 0 0.4rem; gap: 0.2rem; }
+  body.tmode h1 { font-size: 1.6rem; }
+  body.tmode .panel { padding-top: 1rem; gap: 0.8rem; }
+  body.tmode.tlocked #teacher > h2, body.tmode.tlocked #tNote { display: none; }
   .trow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.5rem; }
   .trow input { font: inherit; font-family: var(--font-code); font-size: 1.3rem; width: 6rem; padding: 0.3rem 0.6rem; border: 2px solid var(--leaf-line); border-radius: 10px; text-align: right; }
   .absgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr)); gap: 0.3rem; }
@@ -243,8 +247,9 @@
       <p class="feedback off" id="bFb" role="status" aria-live="polite"></p>
       <form class="answer" id="bForm" autocomplete="off" novalidate>
         <div class="fields"><div class="field"><label for="bIn">答え</label><input id="bIn" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off"><span class="unit" id="bUnit"></span></div></div>
-        <div class="btnrow"><button type="submit" class="btn">答え合わせ</button><button type="button" class="btn pass" id="bPassBtn">パス</button><button type="button" class="btn sub" id="bQuit">メニューへ</button><span class="enterhint">Enter キーでも答え合わせ</span></div>
+        <div class="btnrow"><button type="submit" class="btn">答え合わせ</button><button type="button" class="btn pass" id="bPassBtn">パス</button><span class="enterhint">Enter キーでも答え合わせ</span></div>
       </form>
+      <p style="margin:1rem 0 0"><button type="button" class="linkbtn" id="bQuit">メニューへ（対戦をやめる）</button></p>
     </div>
     <div class="bview" id="bResult" hidden>
       <h2 id="bResH" tabindex="-1">終了</h2>
@@ -261,14 +266,24 @@
   </section>
   <section class="panel" id="teacher" hidden aria-label="教員用　班分け">
     <h2>教員用　班分けとリーグ戦</h2>
-    <p class="note" style="margin:0">扱うのは出席番号だけです．状態はこの端末のブラウザだけに保存されます．</p>
+    <p class="note" id="tNote" style="margin:0">扱うのは出席番号だけです．状態はこの端末のブラウザだけに保存されます．</p>
+    <div class="bview" id="tLocked" hidden>
+      <p style="margin:0;font-weight:700" id="tLockedMsg"></p>
+      <div class="btnrow" id="tUnlockRow"><button type="button" class="btn sub" id="tUnlock">班を解除して編集</button><button type="button" class="linkbtn" disabled>やり直し</button><button type="button" class="linkbtn" disabled>新しく作る</button><span class="note">発表後はロックされています（班の発表の前だけ，やり直せます）</span></div>
+      <div class="feedback ng" id="tConfirm" role="alertdialog" aria-label="班の解除の確認" hidden>
+        <p style="margin:0 0 0.5rem">発表済みの班が消えます．よいですか．</p>
+        <div class="btnrow"><button type="button" class="btn sub" id="tNo">いいえ（戻る）</button><button type="button" class="linkbtn" id="tYes">はい，解除して編集する</button></div>
+      </div>
+    </div>
+    <div class="bview" id="tInput">
     <div class="trow"><label for="tN">人数 N（出席番号 1〜N．6〜60）</label><input id="tN" type="number" inputmode="numeric" min="6" max="60" value="40"><strong id="tM"></strong></div>
     <div>
       <p style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">欠席の番号をクリックで外す／もう一度クリックで戻す（変えると班は作り直しになります）</p>
       <div class="absgrid" id="tAbs"></div>
     </div>
-    <div class="btnrow"><button type="button" class="btn" id="tMake">グループを作る</button><button type="button" class="linkbtn" id="tRedo" hidden>やり直し</button><span class="note" id="tRedoNote" hidden>班の発表の前だけ押す（発表後は押さない）</span><button type="button" class="linkbtn" id="tClear">新しく作る（全部消す）</button></div>
+    <div class="btnrow"><button type="button" class="btn" id="tMake">グループを作る</button><button type="button" class="linkbtn" id="tClear">新しく作る（全部消す）</button><span class="note">班の発表の前だけ押す（発表後はロック）</span></div>
     <p class="feedback retry" id="tMsg" role="alert" hidden></p>
+    </div>
     <p class="note" id="tLs" style="margin:0" hidden>この端末では保存できません．再読み込みで消えます．</p>
     <div class="bview" id="tResult" hidden>
       <div class="tabs" id="tTabs" role="tablist" aria-label="ラウンド"></div>
@@ -1061,7 +1076,9 @@ var DrillCore = (function () {
       }; })(i));
       ab.appendChild(b);
     }
-    var has = !!T.groups; $("tResult").hidden = !has; $("tRedo").hidden = !has; $("tRedoNote").hidden = !has;
+    var has = !!T.groups; $("tResult").hidden = !has;
+    $("tInput").hidden = has; $("tLocked").hidden = !has; document.body.classList.toggle("tlocked", has);                 // 班があるあいだは入力部をたたんでロックする
+    if (has) { $("tLockedMsg").textContent = "班は発表済みです（出席 " + M + " 人・" + T.groups.length + " 班）"; $("tConfirm").hidden = true; $("tUnlockRow").hidden = false; }
     if (!has) return;
     var tabs = $("tTabs"); tabs.innerHTML = "";
     [0, 1, 2].forEach(function (r) {
@@ -1102,7 +1119,9 @@ var DrillCore = (function () {
       T.N = v; T.absent = T.absent.filter(function (x) { return x <= v; }); T.groups = null; T.codes = null; tMsg(""); tSave(); tRender();
     });
     $("tMake").addEventListener("click", tMake);
-    $("tRedo").addEventListener("click", tMake);
+    $("tUnlock").addEventListener("click", function () { $("tUnlockRow").hidden = true; $("tConfirm").hidden = false; $("tNo").focus(); });
+    $("tNo").addEventListener("click", function () { $("tConfirm").hidden = true; $("tUnlockRow").hidden = false; $("tUnlock").focus(); });
+    $("tYes").addEventListener("click", function () { T.groups = null; T.codes = null; tMsg(""); tSave(); tRender(); $("tMake").focus(); });
     $("tClear").addEventListener("click", function () { T = tBlank(); tRound = 0; tMsg(""); try { window.localStorage.removeItem(TKEY); } catch (e) {} tRender(); });
     window.__teacher = function () { return T; };
   }
