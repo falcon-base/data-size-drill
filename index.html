@@ -117,6 +117,8 @@
   .bstages .chip { appearance: none; font: inherit; font-weight: 700; flex: 1 1 0; min-width: 0; min-height: 2.9rem; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.4rem 0.3rem; cursor: pointer; line-height: 1.3; white-space: nowrap; }
   .bstages .chip:hover { border-color: var(--leaf); }
   .bstages .chip[aria-pressed="true"] { background: var(--leaf-deep); border-color: var(--leaf-deep); color: var(--sheet); }
+  .btn.pass { background: var(--pen); color: var(--ink); border: 2px solid var(--ink); margin-left: 0.8rem; min-width: 5.5rem; }
+  .btn.pass:hover { background: var(--pen-soft); }
   .bview { display: grid; gap: 1rem; }
   .bview[hidden] { display: none; }
   .bstages { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -126,10 +128,34 @@
   .bbox .bt, .bbox .bs, .bbox .bv { font-family: var(--font-code); font-weight: 700; font-size: clamp(2.2rem, 11vw, 3.6rem); font-variant-numeric: tabular-nums; }
   .bbox.warn { background: var(--shu-soft); }
   .bbox.warn .bt { color: var(--shu); }
+  .bconfirm { margin: 0; text-align: center; font-weight: 700; font-size: clamp(1.8rem, 8vw, 3rem); line-height: 1.4; }
+  .bconfirm b { font-family: var(--font-code); font-size: clamp(3rem, 16vw, 5.5rem); letter-spacing: 0.08em; display: block; line-height: 1.2; }
   .bcount { margin: 0; text-align: center; font-family: var(--font-code); font-weight: 700; font-size: clamp(5rem, 28vw, 9rem); line-height: 1.1; color: var(--leaf-deep); }
   .bbig { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
   .bbox.main { background: var(--pen-soft); flex-basis: 100%; }
-  .bbox.main .bv { font-size: clamp(3rem, 16vw, 5rem); }
+  .bbox.main .bv { font-size: clamp(3.4rem, 18vw, 6rem); }
+  .bbig .bbox:not(.main) .bv { font-size: clamp(2.4rem, 11vw, 3.6rem); }
+  .tlink { margin: 1.5rem 0 0; text-align: right; font-size: 0.75rem; }
+  .tlink a { color: var(--ink-soft); opacity: 0.55; text-decoration: none; }
+  .tlink a:hover { opacity: 1; text-decoration: underline; }
+  body.tmode .lede { display: none; }
+  body.tmode .page { max-width: 84rem; }
+  .trow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.5rem; }
+  .trow input { font: inherit; font-family: var(--font-code); font-size: 1.3rem; width: 6rem; padding: 0.3rem 0.6rem; border: 2px solid var(--leaf-line); border-radius: 10px; text-align: right; }
+  .absgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr)); gap: 0.3rem; }
+  .absbtn { appearance: none; font: inherit; font-family: var(--font-code); min-height: 2.6rem; background: var(--leaf-soft); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 8px; cursor: pointer; }
+  .absbtn[aria-pressed="true"] { background: var(--shu-soft); color: var(--shu); border-color: var(--shu); text-decoration: line-through; }
+  .tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .tabs .tab { appearance: none; font: inherit; font-weight: 700; font-size: clamp(0.9rem, 3.6vw, 1.19rem); white-space: nowrap; flex: 1 1 0; min-width: 0; min-height: 3rem; background: var(--sheet); border: 2px solid var(--leaf-line); border-radius: 12px; cursor: pointer; padding: 0.3rem 0.4rem; }
+  .tabs .tab[aria-selected="true"] { background: var(--leaf-deep); border-color: var(--leaf-deep); color: var(--sheet); }
+  .tgroups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); gap: 0.8rem; }
+  .tg { --band: var(--leaf-deep); border-radius: 14px; border-left: 1.1rem solid var(--band); background: var(--paper); padding: 0.5rem 1rem 0.6rem; display: grid; gap: 0.1rem; }
+  .tg .gn { font-size: clamp(1.8rem, 5.5vw, 2.8rem); font-weight: 700; line-height: 1.2; color: var(--band); }
+  .tg .gm { font-size: clamp(1.7rem, 5vw, 2.6rem); font-weight: 700; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
+  .tg .gc { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 1rem; }
+  .tg .gc b { font-family: var(--font-code); font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: 0.08em; line-height: 1.3; }
+  .tg .gs { font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 700; color: var(--ink); }
+  .tg .gc span { font-size: clamp(1.1rem, 3vw, 1.6rem); font-weight: 700; color: var(--ink-soft); }
   pre#selftest { background: var(--ink); color: #E8F5EC; border-radius: 10px; padding: 1rem; overflow-x: auto; font-size: 0.8rem; }
 </style>
 </head>
@@ -141,7 +167,7 @@
     <p class="lede">電卓なしで解ける数値だけが出ます．式は紙に書いて，答えだけ入力しよう</p>
   </header>
 
-  <div class="modebar" id="modebar"><button type="button" class="battlebtn" id="battleBtn">対戦<span>合言葉ペア・3分．同じ合言葉・同じ段階なら，2台に同じ問題が同じ順で出ます</span></button></div>
+  <div class="modebar" id="modebar"><button type="button" class="battlebtn" id="battleBtn">対戦<span>合言葉・3分．班のみんなで同じ合言葉・同じ段階を入れて，同時に開始します</span></button></div>
 
   <ul class="stages" id="stages" aria-label="段階の選択"></ul>
 
@@ -190,16 +216,22 @@
   </main>
   <section class="panel" id="battle" hidden aria-label="対戦">
     <div class="bview" id="bSetup">
-      <h2>対戦　合言葉ペア</h2>
-      <p style="margin:0">同じ合言葉・同じ段階なら，2台に同じ問題が同じ順で出ます．ペアで合言葉（数字4桁）を決めて，同時に始めよう．</p>
+      <h2>対戦　班の合言葉</h2>
+      <p style="margin:0">同じ合言葉・同じ段階なら，どの端末にも同じ問題が同じ順で出ます．班のみんなで同じ合言葉（数字4桁）と段階を入れて，同時に開始しよう．</p>
       <div class="field"><label for="bPass">合言葉（数字4桁）</label><input id="bPass" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="例：0420"></div>
       <div>
         <p class="small-label" style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">段階</p>
         <div class="bstages" id="bStages"></div>
-        <p class="note" style="margin:0.4rem 0 0">ラウンド1＝① 換算，ラウンド2＝② 立式，ラウンド3＝③ 文章題 が目安．段階は自由に選べます．1ラウンドは 3 分．1回目で正解 +1，誤答 −1．</p>
+        <p class="note" style="margin:0.4rem 0 0">ラウンド1＝① 換算，ラウンド2＝② 立式，ラウンド3＝③ 文章題 が目安．合言葉と段階は先生の画面で確かめよう．1ラウンドは 3 分．1回目で正解 +1，誤答 −1．</p>
       </div>
       <p class="feedback retry" id="bErr" role="alert" hidden></p>
       <div class="btnrow"><button type="button" class="btn" id="bStart">開始</button><button type="button" class="btn sub" id="bBack">メニューへ</button></div>
+    </div>
+    <div class="bview" id="bConfirm" hidden>
+      <h2 id="bConfH" tabindex="-1">確認</h2>
+      <p class="bconfirm" id="bConfBig"></p>
+      <p style="margin:0;text-align:center;font-weight:700">班のみんなと同じか，指さして確かめよう</p>
+      <div class="btnrow" style="justify-content:center"><button type="button" class="btn" id="bGo">合っている：開始</button><button type="button" class="btn sub" id="bRedo">やり直す</button></div>
     </div>
     <div class="bview" id="bCount" hidden><p class="bcount" id="bCountNum" aria-live="assertive"></p><p style="margin:0;text-align:center">用意…</p></div>
     <div class="bview" id="bPlay" hidden>
@@ -211,21 +243,43 @@
       <p class="feedback off" id="bFb" role="status" aria-live="polite"></p>
       <form class="answer" id="bForm" autocomplete="off" novalidate>
         <div class="fields"><div class="field"><label for="bIn">答え</label><input id="bIn" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off"><span class="unit" id="bUnit"></span></div></div>
-        <div class="btnrow"><button type="submit" class="btn">答え合わせ</button><button type="button" class="btn sub" id="bQuit">メニューへ</button><span class="enterhint">Enter キーでも答え合わせ</span></div>
+        <div class="btnrow"><button type="submit" class="btn">答え合わせ</button><button type="button" class="btn pass" id="bPassBtn">パス</button><button type="button" class="btn sub" id="bQuit">メニューへ</button><span class="enterhint">Enter キーでも答え合わせ</span></div>
       </form>
     </div>
     <div class="bview" id="bResult" hidden>
       <h2 id="bResH" tabindex="-1">終了</h2>
       <p style="margin:0" id="bResInfo"></p>
       <div class="bbig">
-        <div class="bbox main"><span class="bl">得点</span><span class="bv" id="bResScore">0</span></div>
-        <div class="bbox"><span class="bl">正解</span><span class="bv" id="bResOk">0</span></div>
+        <div class="bbox main"><span class="bl">正解数</span><span class="bv" id="bResOk">0</span></div>
+        <div class="bbox"><span class="bl">得点</span><span class="bv" id="bResScore">0</span></div>
+        <div class="bbox"><span class="bl">パス</span><span class="bv" id="bResPa">0</span></div>
         <div class="bbox"><span class="bl">誤答</span><span class="bv" id="bResNg">0</span></div>
       </div>
-      <p class="note" style="margin:0">相手と見せ合おう．この結果はこの端末に保存されません．</p>
+      <p class="note" style="margin:0">班で見せ合おう．この結果はこの端末に保存されません．</p>
       <div class="btnrow"><button type="button" class="btn" id="bAgain">もう一度（別の合言葉）</button><button type="button" class="btn sub" id="bMenu">メニューへ</button></div>
     </div>
   </section>
+  <section class="panel" id="teacher" hidden aria-label="教員用　班分け">
+    <h2>教員用　班分けとリーグ戦</h2>
+    <p class="note" style="margin:0">扱うのは出席番号だけです．状態はこの端末のブラウザだけに保存されます．</p>
+    <div class="trow"><label for="tN">人数 N（出席番号 1〜N．6〜60）</label><input id="tN" type="number" inputmode="numeric" min="6" max="60" value="40"><strong id="tM"></strong></div>
+    <div>
+      <p style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">欠席の番号をクリックで外す／もう一度クリックで戻す（変えると班は作り直しになります）</p>
+      <div class="absgrid" id="tAbs"></div>
+    </div>
+    <div class="btnrow"><button type="button" class="btn" id="tMake">グループを作る</button><button type="button" class="linkbtn" id="tRedo" hidden>やり直し</button><span class="note" id="tRedoNote" hidden>班の発表の前だけ押す（発表後は押さない）</span><button type="button" class="linkbtn" id="tClear">新しく作る（全部消す）</button></div>
+    <p class="feedback retry" id="tMsg" role="alert" hidden></p>
+    <p class="note" id="tLs" style="margin:0" hidden>この端末では保存できません．再読み込みで消えます．</p>
+    <div class="bview" id="tResult" hidden>
+      <div class="tabs" id="tTabs" role="tablist" aria-label="ラウンド"></div>
+      <div><p style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">このラウンドの段階（全部の班で同じ）</p><div class="bstages" id="tStages"></div></div>
+      <div class="tgroups" id="tGroups"></div>
+      <p class="note" style="margin:0">合言葉は班の番号（A班＝1，…，I班＝9，J班＝0．11班以上は2桁）から始まり，班どうし・ラウンドどうしで重なりません．拠点は班の最小の出席番号の席です．順位点は紙で数えます．</p>
+      <p class="note" style="margin:0">欠席・遅刻は班を作り直さず，人数を数え直す．2人以下になった班は他の班に入る（5人目．順位点は5〜1点）．</p>
+    </div>
+    <p class="tlink" style="text-align:left"><a href="?">生徒の画面へ</a></p>
+  </section>
+  <p class="tlink" id="tLink"><a href="?teacher">教員用</a></p>
   <pre id="selftest" hidden></pre>
 </div>
 
@@ -589,10 +643,93 @@ var DrillCore = (function () {
     });
     report.determinism = determinismTest();
     report.totalFail += report.determinism.failures.length;
+    report.groups = groupTest(nPer >= 20000 ? 3000 : 1000);
+    report.totalFail += report.groups.failures.length;
     return report;
   }
 
-  return { setSeed: setSeed, gen: gen, genSeeded: genSeeded, clearSeededCache: clearSeededCache, determinismTest: determinismTest, checkProblem: checkProblem, modelHtml: modelHtml, parseTenths: parseTenths, fmt10: fmt10, selfTest: selfTest,
+  /* ---- 班分け（教員用）：出席番号を3人か4人の班にランダムに分ける ---- */
+  function makeGroups(N, absent) {
+    var present = [], i;
+    for (i = 1; i <= N; i++) if (absent.indexOf(i) < 0) present.push(i);
+    var M = present.length;
+    if (M < 6) return { ok: false, M: M, msg: M + "人は班に分けられません（6人以上）" };
+    var c = [0, 3, 2, 1][M % 4], a = (M - 3 * c) / 4;          // M＝4a＋3c（c＝3人班の数）
+    var sizes = [];
+    for (i = 0; i < a; i++) sizes.push(4);
+    for (i = 0; i < c; i++) sizes.push(3);
+    shuffle(sizes); shuffle(present);
+    var groups = [], pos = 0;
+    sizes.forEach(function (z, g) {
+      var nums = present.slice(pos, pos + z).sort(function (x, y) { return x - y; });
+      pos += z; groups.push({ name: String.fromCharCode(65 + g) + "班", nums: nums });
+    });
+    return { ok: true, M: M, groups: groups };
+  }
+  // 合言葉：班ごとに先頭の桁を固定（班が10以下なら1桁＝A班が1,…,I班が9,J班が0．11班以上なら2桁＝01,02,…）．
+  // 残りの桁はランダムで，同じ班のラウンド1〜3は後ろの桁が重ならない．全体で 班数×3 個がすべて異なる4桁．返り値は [ラウンド][班]
+  function assignCodes(n) {
+    var one = n <= 10, tail = one ? 3 : 2, mod = Math.pow(10, tail), out = [[], [], []];
+    for (var g = 0; g < n; g++) {
+      var pre = one ? String((g + 1) % 10) : ("0" + (g + 1)).slice(-2), used = {}, r = 0;
+      while (r < 3) {
+        var v = ri(0, mod - 1), t = pre + ("00" + v).slice(-tail);
+        if (t === "0000" || t === "1234" || used[t]) continue;
+        used[t] = 1; out[r++][g] = t;
+      }
+    }
+    return out;
+  }
+  function groupTest(trials, seed) {
+    if (seed !== undefined) setSeed(seed);
+    var rep = { trials: trials, combos: 0, makes: 0, failures: [], notDivisible: 0, anyRedoDiffers: true };
+    function fail(m) { if (rep.failures.length < 10) rep.failures.push(m); else rep.failures[10] = "…（以下省略）"; }
+    for (var N = 6; N <= 60; N++) for (var k = 0; k <= 5; k++) {
+      rep.combos++;
+      var M = N - k, diffSeen = false;
+      for (var t = 0; t < trials; t++) {
+        var pool = []; for (var q = 1; q <= N; q++) pool.push(q);
+        shuffle(pool); var absent = pool.slice(0, k);         // 欠席の番号をランダムに k 個
+        var r = makeGroups(N, absent); rep.makes++;
+        if (M < 6) { if (r.ok) fail("M=" + M + " で分けられてしまう"); else rep.notDivisible++; continue; }
+        if (!r.ok) { fail("N=" + N + " k=" + k + " で分けられない"); continue; }
+        var seen = {}, total = 0, g, j;
+        if (r.groups.length > 26) fail("班が26を超える");
+        for (g = 0; g < r.groups.length; g++) {
+          var G = r.groups[g];
+          if (G.name !== String.fromCharCode(65 + g) + "班") fail("班名が不正 " + G.name);
+          if (G.nums.length !== 3 && G.nums.length !== 4) fail("班の人数が3か4でない " + G.nums.length);
+          for (j = 0; j < G.nums.length; j++) {
+            var x = G.nums[j];
+            if (j > 0 && G.nums[j - 1] >= x) fail("昇順でない");
+            if (x < 1 || x > N || absent.indexOf(x) >= 0) fail("欠席・範囲外の番号が入った " + x);
+            if (seen[x]) fail("番号が重複 " + x); seen[x] = 1; total++;
+          }
+        }
+        if (total !== M) fail("出席人数と合わない " + total + "/" + M);
+        for (var x2 = 1; x2 <= N; x2++) if (absent.indexOf(x2) < 0 && !seen[x2]) fail("班に入っていない番号 " + x2);
+        var codes = assignCodes(r.groups.length), all = {}, cnt = 0;
+        codes.forEach(function (row) { row.forEach(function (cd) {
+          cnt++; if (!/^\d{4}$/.test(cd)) fail("合言葉が4桁でない " + cd);
+          if (all[cd]) fail("合言葉が重複 " + cd); all[cd] = 1;
+        }); });
+        var n = r.groups.length;
+        for (var rr = 0; rr < 3; rr++) for (var gg = 0; gg < n; gg++) {      // 先頭桁の規則
+          var cd2 = codes[rr][gg];
+          if (n <= 10 ? cd2.charAt(0) !== String((gg + 1) % 10) : cd2.slice(0, 2) !== ("0" + (gg + 1)).slice(-2)) fail("先頭桁の規則に違反 " + cd2 + " 班" + (gg + 1) + "/" + n);
+        }
+        if (cnt !== r.groups.length * 3) fail("合言葉の個数が 班数×3 でない");
+        if (t < 20 && !diffSeen) {                              // 作り直すと班が変わりうる
+          var r2 = makeGroups(N, absent);
+          if (JSON.stringify(r2.groups) !== JSON.stringify(r.groups)) diffSeen = true;
+        }
+      }
+      if (M >= 6 && !diffSeen) { rep.anyRedoDiffers = false; fail("作り直しても班が変わらない N=" + N + " k=" + k); }
+    }
+    return rep;
+  }
+
+  return { setSeed: setSeed, makeGroups: makeGroups, assignCodes: assignCodes, groupTest: groupTest, gen: gen, genSeeded: genSeeded, clearSeededCache: clearSeededCache, determinismTest: determinismTest, checkProblem: checkProblem, modelHtml: modelHtml, parseTenths: parseTenths, fmt10: fmt10, selfTest: selfTest,
            evalFormula: evalFormula, TEMPL: TEMPL };
 })();
 </script>
@@ -759,11 +896,11 @@ var DrillCore = (function () {
     state = blank(); save(); lastText = null; nth = 0; newQuestion();
   });
 
-  /* ---------- 対戦モード（合言葉ペア）．個人練習の記録には触れない ---------- */
+  /* ---------- 対戦モード（班の合言葉）．個人練習の記録には触れない ---------- */
   var ROUND = 180;
   (function () { var m = /[?&]roundsec=(\d+)/.exec(window.location.search); if (m && +m[1] >= 3 && +m[1] <= 180) ROUND = +m[1]; })();
-  var B = { on: false, stage: 1, pass: "", i: 0, score: 0, ok: 0, ng: 0, endAt: 0, tick: null, cd: null, adv: null, fl: null, p: null, locked: false, endedAt: -1e9 };
-  var BV = ["bSetup", "bCount", "bPlay", "bResult"];
+  var B = { on: false, stage: 1, pass: "", i: 0, score: 0, ok: 0, ng: 0, pa: 0, endAt: 0, tick: null, cd: null, adv: null, fl: null, p: null, locked: false, endedAt: -1e9, confAt: 0 };
+  var BV = ["bSetup", "bConfirm", "bCount", "bPlay", "bResult"];
   function bShow(id) { BV.forEach(function (x) { $(x).hidden = x !== id; }); document.body.classList.toggle("bplay", id === "bPlay"); if (id === "bPlay") window.scrollTo(0, 0); }
   function bStop() { clearInterval(B.tick); clearTimeout(B.cd); clearTimeout(B.adv); clearTimeout(B.fl); B.tick = B.cd = B.adv = B.fl = null; }
   function bNow() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
@@ -796,7 +933,13 @@ var DrillCore = (function () {
     if (B.cd || $("bSetup").hidden) return;   // カウントダウン中は無視（二重に走らせない）
     var ps = normPass($("bPass").value);
     if (!/^\d{4}$/.test(ps)) { var e = $("bErr"); e.textContent = "4桁の数字で入力しよう"; e.hidden = false; $("bPass").focus(); return; }
-    B.pass = ps; B.i = 0; B.score = 0; B.ok = 0; B.ng = 0; B.locked = false;
+    B.pass = ps; B.confAt = bNow();
+    $("bConfBig").innerHTML = "合言葉<b>" + ps + "</b>段階　" + NAMES[B.stage];
+    bShow("bConfirm"); $("bConfH").focus({ preventScroll: true });
+  }
+  function bGo() {
+    if (!B.on || $("bConfirm").hidden || bNow() - B.confAt < 1000) return;     // 確認画面の最初の1秒は無視（Enter 二重押し・誤操作の防止）
+    B.i = 0; B.score = 0; B.ok = 0; B.ng = 0; B.pa = 0; B.locked = false;
     bShow("bCount");
     var n = 3;
     (function step() {
@@ -848,10 +991,18 @@ var DrillCore = (function () {
       B.adv = setTimeout(bAdvance, 2000);
     }
   }
+  function bPass() {                                    // パス：得点は 0．答えと式を見せて次へ
+    if (!B.on || !B.p) return;
+    if (B.endAt - bNow() <= 0) { bEnd(); return; }
+    if (B.locked) { bAdvance(); return; }
+    B.pa++; B.locked = true;
+    bFb("retry", "パス（0点）．答えは " + C.fmt10(B.p.inputs[0].ans10) + " " + B.p.unit + "　式：" + B.p.formula, 0);
+    B.adv = setTimeout(bAdvance, 2000);
+  }
   function bEnd() {
     bStop(); B.p = null;
     $("bResInfo").textContent = "合言葉 " + B.pass + "　" + NAMES[B.stage] + "　" + ROUND + " 秒";
-    $("bResScore").textContent = B.score; $("bResOk").textContent = B.ok; $("bResNg").textContent = B.ng;
+    $("bResScore").textContent = B.score; $("bResOk").textContent = B.ok; $("bResNg").textContent = B.ng; $("bResPa").textContent = B.pa;
     bShow("bResult");
     B.endedAt = bNow();
     $("bResH").focus({ preventScroll: true });          // 結果は保存しないので，Enter 1回で消えないよう見出しに置く
@@ -862,10 +1013,100 @@ var DrillCore = (function () {
   $("bMenu").addEventListener("click", function () { if (bNow() - B.endedAt < 1500) return; leaveBattle(); });
   $("bAgain").addEventListener("click", function () { if (bNow() - B.endedAt < 1500) return; bSetup(true); });
   $("bStart").addEventListener("click", bStart);
+  $("bGo").addEventListener("click", bGo);
+  $("bRedo").addEventListener("click", function () { bShow("bSetup"); $("bPass").focus(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Enter" && B.on && !$("bConfirm").hidden && e.target.tagName !== "BUTTON") { e.preventDefault(); bGo(); } });
   $("bPass").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); bStart(); } });
+  $("bPassBtn").addEventListener("click", bPass);
   $("bForm").addEventListener("submit", function (e) { e.preventDefault(); bSubmit(); });
   $("bIn").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); bSubmit(); } });
   document.addEventListener("visibilitychange", function () { if (B.on && B.tick) bTick(); });
+
+  /* ---------- 教員用：班分けと合言葉（番号だけ．localStorage に残す） ---------- */
+  var TKEY = "dataSizeDrill.teacher.v1", BANDS = ["#1D5B41", "#2F5D8A", "#BD472C", "#7A5A12", "#6B4E9B", "#1F7A86"];
+  var T = null, tRound = 0, tLsOk = true;
+  function tBlank() { return { N: 40, absent: [], groups: null, codes: null, stages: [1, 2, 3] }; }
+  function tLoad() {
+    var t = tBlank();
+    try {
+      var raw = window.localStorage.getItem(TKEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && typeof o.N === "number" && o.N >= 6 && o.N <= 60) {
+          t.N = o.N | 0;
+          if (Array.isArray(o.absent)) t.absent = o.absent.filter(function (x) { return Number.isInteger(x) && x >= 1 && x <= t.N; });
+          if (Array.isArray(o.stages) && o.stages.length === 3) t.stages = o.stages.map(function (x) { return x >= 1 && x <= 3 ? x | 0 : 1; });
+          var okG = Array.isArray(o.groups) && Array.isArray(o.codes) && o.codes.length === 3 && o.codes.every(function (r) { return Array.isArray(r) && r.length === o.groups.length; });
+          if (okG && o.groups.every(function (g) { return g && typeof g.name === "string" && Array.isArray(g.nums); })) { t.groups = o.groups; t.codes = o.codes; }
+        }
+      }
+    } catch (e) { /* 使えなくても，その場限りで動く */ }
+    try { window.localStorage.setItem(TKEY + ".probe", "1"); window.localStorage.removeItem(TKEY + ".probe"); } catch (e2) { tLsOk = false; }
+    return t;
+  }
+  function tSave() { try { window.localStorage.setItem(TKEY, JSON.stringify(T)); } catch (e) { tLsOk = false; } $("tLs").hidden = tLsOk; }
+  function tMsg(m) { var e = $("tMsg"); e.textContent = m || ""; e.hidden = !m; }
+  function tRender() {
+    $("tN").value = T.N;
+    var M = T.N - T.absent.length;
+    $("tM").textContent = "出席 " + M + " 人" + (T.absent.length ? "（欠席 " + T.absent.length + "）" : "");
+    var ab = $("tAbs"); ab.innerHTML = "";
+    for (var i = 1; i <= T.N; i++) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "absbtn"; b.textContent = i;
+      b.setAttribute("aria-pressed", String(T.absent.indexOf(i) >= 0));
+      b.setAttribute("aria-label", i + "番" + (T.absent.indexOf(i) >= 0 ? "（欠席）" : ""));
+      b.addEventListener("click", (function (n) { return function () {
+        var k = T.absent.indexOf(n); if (k >= 0) T.absent.splice(k, 1); else T.absent.push(n);
+        T.groups = null; T.codes = null; tMsg(""); tSave(); tRender();
+      }; })(i));
+      ab.appendChild(b);
+    }
+    var has = !!T.groups; $("tResult").hidden = !has; $("tRedo").hidden = !has; $("tRedoNote").hidden = !has;
+    if (!has) return;
+    var tabs = $("tTabs"); tabs.innerHTML = "";
+    [0, 1, 2].forEach(function (r) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "tab"; b.textContent = "ラウンド" + (r + 1);
+      b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(tRound === r));
+      b.addEventListener("click", function () { tRound = r; tRender(); });
+      tabs.appendChild(b);
+    });
+    var sd = $("tStages"); sd.innerHTML = "";
+    [1, 2, 3].forEach(function (n) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = NAMES[n];
+      b.setAttribute("aria-pressed", String(T.stages[tRound] === n));
+      b.addEventListener("click", function () { T.stages[tRound] = n; tSave(); tRender(); });
+      sd.appendChild(b);
+    });
+    var g = $("tGroups"); g.innerHTML = "";
+    T.groups.forEach(function (G, gi) {
+      var d = document.createElement("div"); d.className = "tg"; d.style.setProperty("--band", BANDS[gi % BANDS.length]);
+      d.innerHTML = '<span class="gn">' + G.name + '</span><span class="gm">' + G.nums.join("・") + '</span>' +
+        '<span class="gc"><b>' + T.codes[tRound][gi] + '</b><span>合言葉　' + NAMES[T.stages[tRound]] + "</span></span>" +
+        '<span class="gs">→ ' + G.nums[0] + "番の席に集まる</span>";
+      g.appendChild(d);
+    });
+  }
+  function tMake() {
+    var r = C.makeGroups(T.N, T.absent);
+    if (!r.ok) { T.groups = null; T.codes = null; tMsg(r.msg); tSave(); tRender(); return; }
+    T.groups = r.groups; T.codes = C.assignCodes(r.groups.length); tMsg(""); tSave(); tRender();
+  }
+  function tInit() {
+    document.body.classList.add("tmode");
+    ["modebar", "stages", "panel", "battle", "tLink"].forEach(function (id) { $(id).hidden = true; });
+    $("teacher").hidden = false;
+    T = tLoad(); $("tLs").hidden = tLsOk; tRender();
+    $("tN").addEventListener("change", function () {
+      var v = Math.round(Number($("tN").value));
+      if (!(v >= 6 && v <= 60)) { tMsg("人数は 6〜60 で入力してください"); $("tN").value = T.N; return; }
+      T.N = v; T.absent = T.absent.filter(function (x) { return x <= v; }); T.groups = null; T.codes = null; tMsg(""); tSave(); tRender();
+    });
+    $("tMake").addEventListener("click", tMake);
+    $("tRedo").addEventListener("click", tMake);
+    $("tClear").addEventListener("click", function () { T = tBlank(); tRound = 0; tMsg(""); try { window.localStorage.removeItem(TKEY); } catch (e) {} tRender(); });
+    window.__teacher = function () { return T; };
+  }
+  if (/[?&]teacher(?:[&=]|$)/.test(window.location.search)) tInit();
 
   var qs = window.location.search;
   if (/[?&]selftest=1/.test(qs)) {
