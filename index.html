@@ -110,7 +110,9 @@
   .battlebtn { appearance: none; font: inherit; width: 100%; text-align: left; background: var(--pen); color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 0.6rem 1rem; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.8rem; min-height: 3.2rem; font-weight: 700; font-size: var(--step-1); }
   .battlebtn:hover { background: var(--pen-soft); }
   .battlebtn span { font-size: var(--step--1); font-weight: 400; color: var(--ink-soft); }
-  #bFb { min-height: 3rem; margin: 0; }
+  #bFb { min-height: 6.8rem; margin: 0; overflow-wrap: anywhere; }
+  #bResH:focus { outline: none; }
+  body.bplay .masthead { display: none; }                       /* 対戦中は見出しをたたみ，問題と入力欄を画面に収める */
   #bFb.off { visibility: hidden; }
   .bstages .chip { appearance: none; font: inherit; font-weight: 700; flex: 1 1 0; min-width: 0; min-height: 2.9rem; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.4rem 0.3rem; cursor: pointer; line-height: 1.3; white-space: nowrap; }
   .bstages .chip:hover { border-color: var(--leaf); }
@@ -190,7 +192,7 @@
     <div class="bview" id="bSetup">
       <h2>対戦　合言葉ペア</h2>
       <p style="margin:0">同じ合言葉・同じ段階なら，2台に同じ問題が同じ順で出ます．ペアで合言葉（数字4桁）を決めて，同時に始めよう．</p>
-      <div class="field"><label for="bPass">合言葉（数字4桁）</label><input id="bPass" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="例：4桁の数字"></div>
+      <div class="field"><label for="bPass">合言葉（数字4桁）</label><input id="bPass" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="例：0420"></div>
       <div>
         <p class="small-label" style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">段階</p>
         <div class="bstages" id="bStages"></div>
@@ -213,7 +215,7 @@
       </form>
     </div>
     <div class="bview" id="bResult" hidden>
-      <h2>終了</h2>
+      <h2 id="bResH" tabindex="-1">終了</h2>
       <p style="margin:0" id="bResInfo"></p>
       <div class="bbig">
         <div class="bbox main"><span class="bl">得点</span><span class="bv" id="bResScore">0</span></div>
@@ -760,9 +762,9 @@ var DrillCore = (function () {
   /* ---------- 対戦モード（合言葉ペア）．個人練習の記録には触れない ---------- */
   var ROUND = 180;
   (function () { var m = /[?&]roundsec=(\d+)/.exec(window.location.search); if (m && +m[1] >= 3 && +m[1] <= 180) ROUND = +m[1]; })();
-  var B = { on: false, stage: 1, pass: "", i: 0, score: 0, ok: 0, ng: 0, endAt: 0, tick: null, cd: null, adv: null, fl: null, p: null, locked: false };
+  var B = { on: false, stage: 1, pass: "", i: 0, score: 0, ok: 0, ng: 0, endAt: 0, tick: null, cd: null, adv: null, fl: null, p: null, locked: false, endedAt: -1e9 };
   var BV = ["bSetup", "bCount", "bPlay", "bResult"];
-  function bShow(id) { BV.forEach(function (x) { $(x).hidden = x !== id; }); }
+  function bShow(id) { BV.forEach(function (x) { $(x).hidden = x !== id; }); document.body.classList.toggle("bplay", id === "bPlay"); if (id === "bPlay") window.scrollTo(0, 0); }
   function bStop() { clearInterval(B.tick); clearTimeout(B.cd); clearTimeout(B.adv); clearTimeout(B.fl); B.tick = B.cd = B.adv = B.fl = null; }
   function bNow() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
   function bStages() {
@@ -785,7 +787,7 @@ var DrillCore = (function () {
     bSetup(true); window.scrollTo(0, 0);
   }
   function leaveBattle() {
-    bStop(); B.on = false; B.p = null;
+    bStop(); B.on = false; B.p = null; document.body.classList.remove("bplay");
     $("battle").hidden = true; $("modebar").hidden = false; $("stages").hidden = false; $("panel").hidden = false;
     window.scrollTo(0, 0);
   }
@@ -842,7 +844,7 @@ var DrillCore = (function () {
       B.i++; bShowQ(); bFb("ok", "正解！ +1", 700);
     } else {
       B.score--; B.ng++; $("bScore").textContent = B.score; B.locked = true;
-      bFb("ng", "誤答 −1．答えは " + C.fmt10(B.p.inputs[0].ans10) + " " + B.p.unit + "　式：" + B.p.formula + " " + B.p.unit, 0);
+      bFb("ng", "誤答 −1．答えは " + C.fmt10(B.p.inputs[0].ans10) + " " + B.p.unit + "　式：" + B.p.formula, 0);
       B.adv = setTimeout(bAdvance, 2000);
     }
   }
@@ -851,13 +853,14 @@ var DrillCore = (function () {
     $("bResInfo").textContent = "合言葉 " + B.pass + "　" + NAMES[B.stage] + "　" + ROUND + " 秒";
     $("bResScore").textContent = B.score; $("bResOk").textContent = B.ok; $("bResNg").textContent = B.ng;
     bShow("bResult");
-    $("bAgain").focus();
+    B.endedAt = bNow();
+    $("bResH").focus({ preventScroll: true });          // 結果は保存しないので，Enter 1回で消えないよう見出しに置く
   }
   $("battleBtn").addEventListener("click", enterBattle);
   $("bBack").addEventListener("click", leaveBattle);
   $("bQuit").addEventListener("click", leaveBattle);
-  $("bMenu").addEventListener("click", leaveBattle);
-  $("bAgain").addEventListener("click", function () { bSetup(true); });
+  $("bMenu").addEventListener("click", function () { if (bNow() - B.endedAt < 1500) return; leaveBattle(); });
+  $("bAgain").addEventListener("click", function () { if (bNow() - B.endedAt < 1500) return; bSetup(true); });
   $("bStart").addEventListener("click", bStart);
   $("bPass").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); bStart(); } });
   $("bForm").addEventListener("submit", function (e) { e.preventDefault(); bSubmit(); });
