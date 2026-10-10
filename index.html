@@ -254,7 +254,7 @@ var DrillCore = (function () {
     var oddD = Dv.filter(function (d) { return d.odd > 1n; }).map(function (d) { return d.odd; });
     var text = "各数を 2 のべきで書く：" + partsM.concat(partsD).join("，") + "．" +
       "2 の指数の和は，かける側 " + (sumM.length > 1 ? sumM.join("+") + "＝" : "") + A +
-      "，わる側 " + (sumD.length > 1 ? sumD.join("+") + "＝" : "") + B + "．差は " + A + "−" + B + "＝" + (D < 0 ? "−" + (-D) + "（わる側が " + (-D) + " 多い）" : D) + "（消えるぶんを引く）．" +
+      "，わる側 " + (sumD.length > 1 ? sumD.join("+") + "＝" : "") + B + "．差は " + A + "−" + B + "＝" + (D < 0 ? "−" + (-D) + "（わる側が " + (-D) + " 多い）" : D) + "．消えるぶんを引く．" +
       "残る奇数は " + (oddList.length ? oddList.join("×") + (oddD.length ? "÷" + oddD.join("÷") : "") + "＝" + q : "なし（1）") +
       "．よって " + q + (D >= 0 ? "×" + sup(D) : "÷" + sup(-D));
     // 検算：q × 2^D が答えの有理数と一致
@@ -394,7 +394,7 @@ var DrillCore = (function () {
       return finishData(3, "動画", { units: ["MB", "GB"], mult: [b, s[0], s[1], f, t],
         q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画を " + nm(t) + " 秒間撮影した．圧縮しないときのデータ量は何 " + u + " か．"; } }); },
     function () { var b = pick([1, 8, 16]), s = pick(SIZES2), f = pick([8, 16, 24, 30]), m = pick([1, 2, 4]);
-      return finishData(3, "映画の予告編", { units: ["MB", "GB"], mult: [b, s[0], s[1], f, m, 60], opts: { note: "1分＝60秒．分は ×60 で秒に直してから式に入れる．" },
+      return finishData(3, "映画の予告編", { units: ["MB", "GB"], mult: [b, s[0], s[1], f].concat(m === 1 ? [60] : [m, 60]), opts: { note: "1分＝60秒．分は ×60 で秒に直してから式に入れる．" },
         q: function (u) { return "映画の予告編（" + nm(m + " 分") + "）を，解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps で圧縮せずに保存する．データ量は何 " + u + " か．"; } }); },
     function () {                                    // 保存できる枚数
       var gb = pick([true, false]), cap = gb ? pick([1, 2, 4]) : pick([256, 512]);
@@ -680,8 +680,9 @@ var DrillCore = (function () {
       setFeedback("ng", "答えは " + ans + " でした．模範の式で確かめよう．");
     }
     var nb = $("nextBtn");
-    nb.textContent = (clearedNow && state.stage < 4) ? "第" + (state.stage + 1) + "段階へ進む" : "次の問題へ";
-    nb.setAttribute("data-clear", clearedNow && state.stage < 4 ? "1" : "");
+    var goNext = clearedNow && state.stage < 4 && !allCleared();
+    nb.textContent = goNext ? "第" + (state.stage + 1) + "段階へ進む" : "次の問題へ";
+    nb.setAttribute("data-clear", goNext ? "1" : "");
     show($("nextRow"), true);
     renderStages(); renderStreak();
     nb.focus();
