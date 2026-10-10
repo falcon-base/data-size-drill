@@ -7,7 +7,7 @@
 <meta name="description" content="情報Ⅰ「情報のデジタル表現」第7回．データ量の計算を，自分の進度で乱数問題として解くドリル．式は紙に書いて，答えだけ入力する．">
 <style>
   :root {
-    /* 画素の解剖器・動画デジタル化シミュレータ・ランレングス圧縮シミュレータと同じ配色 */
+    /* 画素の解剖器・動画デジタル化シミュレータ・rle-simulator と同じ配色 */
     --paper: #F4F6F0;
     --sheet: #FFFFFF;
     --leaf: #2E7D5B;
@@ -50,8 +50,8 @@
   .marker { background: linear-gradient(transparent 62%, var(--pen) 62%); padding: 0 0.1em; }
   .lede { margin: 0; color: var(--ink); font-weight: 700; }
 
-  .stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0 0 1rem; padding: 0; list-style: none; }
-  @media (max-width: 40rem) { .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+  @media (max-width: 40rem) { .stages { grid-template-columns: repeat(3, minmax(0, 1fr)); } .stagebtn { padding: 0.4rem 0.5rem; } }
   .stagebtn { appearance: none; font: inherit; width: 100%; text-align: left; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.5rem 0.75rem; cursor: pointer; display: grid; gap: 0.1rem; min-height: 3.6rem; line-height: 1.4; }
   .stagebtn:hover { border-color: var(--leaf); }
   .stagebtn[aria-pressed="true"] { background: var(--leaf-deep); border-color: var(--leaf-deep); color: var(--sheet); }
@@ -169,7 +169,6 @@
         <li>静止画：データ量（ビット）＝1画素のビット数×画素数（画素数＝横×縦）</li>
         <li>音：データ量（ビット）＝量子化ビット数×チャンネル数×標本化周波数×時間（秒）</li>
         <li>動画：1フレームのビット数＝1画素のビット数×画素数　／　データ量（ビット）＝1フレームのビット数×フレームレート×時間（秒）</li>
-        <li>ランレングス圧縮：1行ごとに，最初の1ビット（始まりが A なら 0，B なら 1）＋続く個数−1を4ビットで書く（1行 16 ビット）</li>
         <li>答えは整数か小数第1位まで．単位は問題が指定する．</li>
       </ul>
     </details>
@@ -205,7 +204,7 @@ var DrillCore = (function () {
     }
     return arr;
   }
-  var stats = { rejects: { 1: 0, 2: 0, 3: 0, 4: 0 } };
+  var stats = { rejects: { 1: 0, 2: 0, 3: 0 } };
 
   /* ---- 厳密な有理数（BigInt） ---- */
   function frac(x) {
@@ -404,75 +403,7 @@ var DrillCore = (function () {
         "枚", up, [b, s[0], s[1]], { min: 2, max: 40000, maxOdd: 1, note: "容量をビットに直し（×1024 や ×8），画像 1 枚のビット数（1 画素のビット数×横×縦）でわる．" }); }
   ];
 
-  /* ---- 第4段階：圧縮率（ランレングス） ---- */
-  function cuts(r) {                                   // 16 ドットを r 個のランに分ける（各ラン 1〜16）
-    var pts = [], i;
-    var pool = []; for (i = 1; i <= 15; i++) pool.push(i);
-    shuffle(pool); pts = pool.slice(0, r - 1).sort(function (a, b) { return a - b; });
-    var lens = [], prev = 0;
-    pts.forEach(function (p) { lens.push(p - prev); prev = p; });
-    lens.push(16 - prev); return lens;
-  }
-  function distribute(rows, R, cap) {                 // 各行のラン数（合計 R）
-    var rc = []; for (var i = 0; i < rows; i++) rc.push(1);
-    var left = R - rows;
-    while (left > 0) { var j = ri(0, rows - 1); if (rc[j] < cap) { rc[j]++; left--; } }
-    return rc;
-  }
-  function encodeRow(bitsStr) {                        // 独立な符号化（検算にも使う）
-    var out = bitsStr[0], i = 0;
-    while (i < bitsStr.length) {
-      var j = i; while (j < bitsStr.length && bitsStr[j] === bitsStr[i]) j++;
-      var s = (j - i - 1).toString(2); while (s.length < 4) s = "0" + s;
-      out += s; i = j;
-    }
-    return out;
-  }
-  function runsOf(bitsStr) {
-    var runs = [], i = 0;
-    while (i < bitsStr.length) { var j = i; while (j < bitsStr.length && bitsStr[j] === bitsStr[i]) j++; runs.push({ c: bitsStr[i], n: j - i }); i = j; }
-    return runs;
-  }
-  function genRows(rows, R, cap) {
-    var rc = distribute(rows, R, cap), out = [];
-    rc.forEach(function (r) {
-      var lens = cuts(r), c = ri(0, 1), s = "";
-      lens.forEach(function (n) { for (var k = 0; k < n; k++) s += c; c = 1 - c; });
-      out.push(s);
-    });
-    return out;
-  }
-  function mk4(kind, rowsStr, qintro) {
-    var k = rowsStr.length, total = 16 * k;
-    var bits = 0; rowsStr.forEach(function (s) { bits += 1 + 4 * runsOf(s).length; });
-    var r10n = BigInt(bits) * 1000n;
-    if (r10n % BigInt(total) !== 0n) return null;      // 圧縮率が小数第1位までで表せない
-    var rate10 = Number(r10n / BigInt(total));
-    var q = '<p class="qtext">' + qintro + '</p>';
-    if (kind === "図") {
-      q += '<div class="legend"><span><i class="sw a"></i>白（A＝0）</span><span><i class="sw b"></i>黒（B＝1）</span><span>16×16＝256 ビット</span></div>' +
-        '<div class="boardwrap"><div class="rownums" aria-hidden="true">' + rowsStr.map(function (_, i) { return "<span>" + (i + 1) + "</span>"; }).join("") + '</div>' +
-        '<div class="board" role="img" aria-label="16×16 のドット絵">' + rowsStr.map(function (s) { return s.split("").map(function (c) { return '<i class="cell' + (c === "1" ? " b" : "") + '"></i>'; }).join(""); }).join("") + '</div></div>';
-    } else {
-      q += '<div class="codes">' + rowsStr.map(function (s, i) { return '<span><span class="no">行' + (i + 1) + '</span><span class="bits">' + s + '</span></span>'; }).join("") + '</div>' +
-        '<div class="legend"><span>A＝0，B＝1</span><span>' + k + '行×16＝' + total + ' ビット</span></div>';
-    }
-    return {
-      stage: 4, kind: kind, qhtml: q, qtext: tags(qintro) + " " + rowsStr.join(" "), unit: "ビット／％", rowsStr: rowsStr, total: total, bits: bits,
-      inputs: [{ label: "圧縮後のビット数", unit: "ビット", ans10: bits * 10 }, { label: "圧縮率", unit: "％", ans10: rate10 }],
-      mult: null, div: null, formula: null, expl: null, explOk: true, note: null
-    };
-  }
-  var S4 = [
-    function () {                                      // 16×16 の図
-      var R = pick([20, 28, 36, 44]);
-      return mk4("図", genRows(16, R, 10), "16×16 のドット絵を，1 行（16 ドット）ごとにランレングス圧縮する．圧縮後の全体のビット数と，圧縮率（圧縮後÷圧縮前×100）を答えよ．"); },
-    function () {                                      // 4 行の符号列
-      var R = pick([5, 7, 9, 11, 13]);
-      return mk4("符号列", genRows(4, R, 8), "次の 4 行の符号列を，1 行（16 ビット）ごとにランレングス圧縮する．圧縮後の全体のビット数と，圧縮率（圧縮後÷圧縮前×100）を答えよ．"); }
-  ];
-
-  var TEMPL = { 1: S1, 2: S2, 3: S3, 4: S4 };
+  var TEMPL = { 1: S1, 2: S2, 3: S3 };
   function gen(stage, lastText) {
     var T = TEMPL[stage];
     for (var tries = 0; tries < 200; tries++) {
@@ -486,19 +417,6 @@ var DrillCore = (function () {
 
   /* ---- 模範の式（HTML） ---- */
   function modelHtml(p) {
-    if (p.stage === 4) {
-      var lines = p.rowsStr.map(function (s, i) {
-        var runs = runsOf(s);
-        return "<span>行" + (i + 1) + "：" + runs.map(function (r) { return (r.c === "0" ? "A" : "B") + r.n; }).join(" ") + "（" + runs.length + "個）→" + (1 + 4 * runs.length) + "ビット</span>";
-      }).join("");
-      var R = 0; p.rowsStr.forEach(function (s) { R += runsOf(s).length; });
-      var rate = fmt10(p.inputs[1].ans10);
-      return "<h3>模範の式</h3>" +
-        '<p class="formula">1行＝1＋4×(ランの数)　　全体＝' + p.rowsStr.length + "＋4×" + R + "＝" + p.bits + " ビット</p>" +
-        '<p class="formula">圧縮率＝' + p.bits + "÷" + p.total + "×100＝" + rate + " ％</p>" +
-        '<div class="rowlist">' + lines + "</div>" +
-        '<p class="expl">各行は「最初の1ビット」＋「ランごとに4ビット」．ランの数は，同じ記号が続く区切りを数える（A3 は A が3個続く）．' + p.total + " ビット（" + p.rowsStr.length + "行×16）が圧縮前．</p>";
-    }
     var h = "<h3>模範の式</h3><p class=\"formula\">" + p.formula + " " + p.unit + "</p>";
     if (p.expl) h += '<p class="expl">約分の見方：' + p.expl + "</p>";
     if (p.note) h += '<p class="note">' + p.note + "</p>";
@@ -531,36 +449,22 @@ var DrillCore = (function () {
   function selfTest(nPer, seed) {
     if (seed !== undefined) setSeed(seed);
     var report = { n: nPer, perStage: {}, totalChecked: 0, totalFail: 0 };
-    [1, 2, 3, 4].forEach(function (st) {
+    [1, 2, 3].forEach(function (st) {
       var rej0 = stats.rejects[st], fails = [], kinds = {}, last = null, nfail = 0;
       for (var i = 0; i < nPer; i++) {
         var p = gen(st, last); last = p.qtext; kinds[p.kind] = (kinds[p.kind] || 0) + 1;
         var bad = [];
         p.inputs.forEach(function (inp) {
           if (!Number.isSafeInteger(inp.ans10) || inp.ans10 <= 0) bad.push("答えが正の整数(×10)でない");
-          if (st !== 4 && inp.ans10 % 5 !== 0 && p.kind !== "Hz→kHz") bad.push("整数かx.5でない");
+          if (inp.ans10 % 5 !== 0 && p.kind !== "Hz→kHz") bad.push("整数かx.5でない");
         });
-        if (st !== 4) {
+        {
           if (!evalFormula(p.formula)) bad.push("模範の式が成り立たない: " + p.formula);
           if (p.formula.split("＝")[1] !== fmt10(p.inputs[0].ans10)) bad.push("式の右辺と答えが不一致");
           if (!p.explOk) bad.push("2のべき説明の検算が不一致");
           if (["バイト", "ビット", "KB", "MB", "GB", "秒", "分", "Hz", "kHz", "枚"].indexOf(p.unit) < 0) bad.push("単位が不正: " + p.unit);
           if (st >= 2 && p.kind !== "保存できる枚数" && p.kind !== "逆算（時間）" && p.qtext.indexOf(p.unit) < 0) bad.push("問題文に単位がない");
           if (/\.\d\d/.test(p.formula.split("＝")[1])) bad.push("答えが小数第2位以下");
-        } else {
-          var tot = 0, k = p.rowsStr.length;
-          p.rowsStr.forEach(function (s) {
-            if (s.length !== 16 || /[^01]/.test(s)) bad.push("行が16ビットの0/1でない");
-            var code = encodeRow(s);
-            runsOf(s).forEach(function (r) { if (r.n < 1 || r.n > 16) bad.push("ラン長が範囲外"); });
-            if (code.length !== 1 + 4 * runsOf(s).length) bad.push("符号長が 1+4×ラン数 でない");
-            tot += code.length;
-          });
-          if (tot !== p.bits || p.inputs[0].ans10 !== tot * 10) bad.push("圧縮後ビット数が不一致");
-          if ((1000 * tot) % (16 * k) !== 0) bad.push("圧縮率が小数第1位で割り切れない");
-          if (p.inputs[1].ans10 !== 1000 * tot / (16 * k)) bad.push("圧縮率が不一致");
-          if (k === 16 && tot % 32 !== 0) bad.push("図の圧縮後ビット数が32の倍数でない");
-          if (k === 4 && tot % 8 !== 0) bad.push("符号列の圧縮後ビット数が8の倍数でない");
         }
         if (bad.length) { report.totalFail++; nfail++; if (fails.length < 5) fails.push({ q: p.qtext, why: bad }); }
         report.totalChecked++;
@@ -571,7 +475,7 @@ var DrillCore = (function () {
   }
 
   return { setSeed: setSeed, gen: gen, modelHtml: modelHtml, parseTenths: parseTenths, fmt10: fmt10, selfTest: selfTest,
-           encodeRow: encodeRow, runsOf: runsOf, evalFormula: evalFormula, TEMPL: TEMPL };
+           evalFormula: evalFormula, TEMPL: TEMPL };
 })();
 </script>
 
@@ -581,19 +485,18 @@ var DrillCore = (function () {
 (function () {
   if (typeof document === "undefined") return;
   var C = DrillCore;
-  var NAMES = { 1: "① 換算", 2: "② 立式", 3: "③ 考査型", 4: "④ 圧縮率" };
+  var NAMES = { 1: "① 換算", 2: "② 立式", 3: "③ 考査型" };
   var TITLES = {
     1: "第1段階　換算（ビット・バイト・KB・MB・GB，時間，kHz）",
     2: "第2段階　立式（文字・音・静止画・動画のデータ量）",
-    3: "第3段階　考査型の文章題",
-    4: "第4段階　圧縮率（ランレングス圧縮）"
+    3: "第3段階　考査型の文章題"
   };
   var KEY = "dataSizeDrill.v1";
   var state = null, cur = null, nth = 0, lastText = null;
 
   function blank() {
     var s = { v: 1, stage: 1, pending: false, stages: {} };
-    for (var i = 1; i <= 4; i++) s.stages[i] = { tried: 0, ok1: 0, ok2: 0, streak: 0, cleared: false };
+    for (var i = 1; i <= 3; i++) s.stages[i] = { tried: 0, ok1: 0, ok2: 0, streak: 0, cleared: false };
     return s;
   }
   function load() {
@@ -603,11 +506,11 @@ var DrillCore = (function () {
       if (raw) {
         var o = JSON.parse(raw);
         if (o && o.v === 1 && o.stages) {
-          for (var i = 1; i <= 4; i++) if (o.stages[i]) {
+          for (var i = 1; i <= 3; i++) if (o.stages[i]) {
             var a = o.stages[i], t = s.stages[i];
             t.tried = Math.max(0, a.tried | 0); t.ok1 = Math.max(0, a.ok1 | 0); t.ok2 = Math.max(0, a.ok2 | 0); t.streak = Math.max(0, a.streak | 0); t.cleared = !!a.cleared;
           }
-          if (o.stage >= 1 && o.stage <= 4) s.stage = o.stage | 0;
+          if (o.stage >= 1 && o.stage <= 3) s.stage = o.stage | 0;
           if (o.pending) s.stages[s.stage].streak = 0;   // 未回答のまま離れた問題は連続を切る
         }
       }
@@ -620,7 +523,7 @@ var DrillCore = (function () {
 
   function renderStages() {
     var ul = $("stages"); ul.innerHTML = "";
-    for (var i = 1; i <= 4; i++) {
+    for (var i = 1; i <= 3; i++) {
       var st = state.stages[i], li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.className = "stagebtn"; b.setAttribute("data-stage", i);
       b.setAttribute("aria-pressed", String(state.stage === i));
@@ -643,7 +546,7 @@ var DrillCore = (function () {
     cur = { p: C.gen(state.stage, lastText), attempts: 0, done: false };
     lastText = cur.p.qtext; nth++;
     $("qno").textContent = "問 " + nth + "（この画面で出した問題の通し番号）";
-    $("qbody").innerHTML = cur.p.stage === 4 ? cur.p.qhtml : '<p class="qtext">' + cur.p.qhtml + "</p>";
+    $("qbody").innerHTML = '<p class="qtext">' + cur.p.qhtml + "</p>";
     var f = $("fields"); f.innerHTML = "";
     cur.p.inputs.forEach(function (inp, i) {
       var d = document.createElement("div"); d.className = "field";
@@ -659,7 +562,7 @@ var DrillCore = (function () {
     else if (mode === "next") document.querySelector(".qbox").scrollIntoView({ block: "start" });
   }
 
-  function allCleared() { for (var i = 1; i <= 4; i++) if (!state.stages[i].cleared) return false; return true; }
+  function allCleared() { for (var i = 1; i <= 3; i++) if (!state.stages[i].cleared) return false; return true; }
   function setFeedback(cls, msg) { var f = $("feedback"); f.className = "feedback " + cls; f.textContent = msg; show(f, true); }
 
   function finish(correct, first, p) {
@@ -673,14 +576,14 @@ var DrillCore = (function () {
     $("checkBtn").disabled = true;
     var ans = p.inputs.map(function (i) { return (p.inputs.length > 1 ? i.label + "＝" : "") + C.fmt10(i.ans10) + " " + i.unit; }).join("，");
     if (clearedNow) {
-      setFeedback("clear", allCleared() ? "3問連続正解．全段階クリア！　続けて練習もできます．" : "3問連続正解．第" + state.stage + "段階クリア！" + (state.stage < 4 ? "　次の段階へ進めます．" : ""));
+      setFeedback("clear", allCleared() ? "3問連続正解．全段階クリア！　続けて練習もできます．" : "3問連続正解．第" + state.stage + "段階クリア！" + (state.stage < 3 ? "　次の段階へ進めます．" : ""));
     } else if (correct) {
       setFeedback("ok", first ? "正解！" : "正解（2回目）．連続正解は最初からやり直し．");
     } else {
       setFeedback("ng", "答えは " + ans + " でした．模範の式で確かめよう．");
     }
     var nb = $("nextBtn");
-    var goNext = clearedNow && state.stage < 4 && !allCleared();
+    var goNext = clearedNow && state.stage < 3 && !allCleared();
     nb.textContent = goNext ? "第" + (state.stage + 1) + "段階へ進む" : "次の問題へ";
     nb.setAttribute("data-clear", goNext ? "1" : "");
     show($("nextRow"), true);
