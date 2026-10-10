@@ -110,6 +110,11 @@
   .battlebtn { appearance: none; font: inherit; width: 100%; text-align: left; background: var(--pen); color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 0.6rem 1rem; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.8rem; min-height: 3.2rem; font-weight: 700; font-size: var(--step-1); }
   .battlebtn:hover { background: var(--pen-soft); }
   .battlebtn span { font-size: var(--step--1); font-weight: 400; color: var(--ink-soft); }
+  #bFb { min-height: 3rem; margin: 0; }
+  #bFb.off { visibility: hidden; }
+  .bstages .chip { appearance: none; font: inherit; font-weight: 700; flex: 1 1 0; min-width: 0; min-height: 2.9rem; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.4rem 0.3rem; cursor: pointer; line-height: 1.3; white-space: nowrap; }
+  .bstages .chip:hover { border-color: var(--leaf); }
+  .bstages .chip[aria-pressed="true"] { background: var(--leaf-deep); border-color: var(--leaf-deep); color: var(--sheet); }
   .bview { display: grid; gap: 1rem; }
   .bview[hidden] { display: none; }
   .bstages { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -185,7 +190,7 @@
     <div class="bview" id="bSetup">
       <h2>対戦　合言葉ペア</h2>
       <p style="margin:0">同じ合言葉・同じ段階なら，2台に同じ問題が同じ順で出ます．ペアで合言葉（数字4桁）を決めて，同時に始めよう．</p>
-      <div class="field"><label for="bPass">合言葉（数字4桁）</label><input id="bPass" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="1234"></div>
+      <div class="field"><label for="bPass">合言葉（数字4桁）</label><input id="bPass" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="例：4桁の数字"></div>
       <div>
         <p class="small-label" style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">段階</p>
         <div class="bstages" id="bStages"></div>
@@ -201,11 +206,11 @@
         <div class="bbox"><span class="bl">得点</span><span class="bs" id="bScore">0</span></div>
       </div>
       <section class="qbox"><div id="bQ"></div></section>
+      <p class="feedback off" id="bFb" role="status" aria-live="polite"></p>
       <form class="answer" id="bForm" autocomplete="off" novalidate>
         <div class="fields"><div class="field"><label for="bIn">答え</label><input id="bIn" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off"><span class="unit" id="bUnit"></span></div></div>
         <div class="btnrow"><button type="submit" class="btn">答え合わせ</button><button type="button" class="btn sub" id="bQuit">メニューへ</button><span class="enterhint">Enter キーでも答え合わせ</span></div>
       </form>
-      <p class="feedback" id="bFb" role="status" aria-live="polite" hidden></p>
     </div>
     <div class="bview" id="bResult" hidden>
       <h2>終了</h2>
@@ -464,11 +469,26 @@ var DrillCore = (function () {
   }
 
   // 対戦用：問題 i は (合言葉, 段階, i) だけから決まる．捨てて引き直す乱数も同じ種つき乱数．
-  function genSeeded(stage, pass, i) {
+  // 問題 i は (合言葉, 段階, i) の種で作る．直前（引き直し後の i−1 番）と問題文が同じなら，副種 (…, i, r) で引き直す（決定的）．
+  // 並びの先頭から順に作ってキャッシュする（どの順に呼んでも同じ結果）．
+  var seededCache = { key: null, list: [], redrawn: 0 };
+  function genOne(stage, pass, tag) {
     var saved = rng;
-    rng = makeRng(hashSeed(pass, stage, i));
+    rng = makeRng(hashSeed(pass, stage, tag));
     try { return gen(stage, null); } finally { rng = saved; }
   }
+  function genSeeded(stage, pass, i) {
+    var key = pass + "|" + stage;
+    if (seededCache.key !== key) seededCache = { key: key, list: [], redrawn: 0 };
+    var L = seededCache.list;
+    while (L.length <= i) {
+      var n = L.length, p = genOne(stage, pass, n);
+      for (var r = 1; n > 0 && p.qtext === L[n - 1].qtext && r <= 30; r++) { p = genOne(stage, pass, n + "|r" + r); seededCache.redrawn++; }
+      L.push(p);
+    }
+    return L[i];
+  }
+  function clearSeededCache() { seededCache = { key: null, list: [], redrawn: 0 }; }
 
   /* ---- 模範の式（HTML） ---- */
   function modelHtml(p) {
@@ -519,20 +539,25 @@ var DrillCore = (function () {
   // 対戦の決定性：同じ種なら同じ問題列／問題 i は単独で作っても同じ／別の合言葉・段階なら別の列／全問が割り切れ検査を通る
   function determinismTest() {
     var passes = ["0000", "1234", "9999", "2468", "0007", "5150"], N = 200;
-    var rep = { passes: passes.length, perStage: N, checked: 0, failures: [] };
+    var rep = { passes: passes.length, perStage: N, checked: 0, failures: [], redrawn: 0 };
     [1, 2, 3].forEach(function (st) {
       passes.forEach(function (ps) {
         var A = [], B = [], i;
+        clearSeededCache();
         for (i = 0; i < N; i++) A.push(genSeeded(st, ps, i));
-        for (i = 0; i < N; i++) B.push(genSeeded(st, ps, i));
+        rep.redrawn += seededCache.redrawn;
+        clearSeededCache();
+        for (i = N - 1; i >= 0; i--) B[i] = genSeeded(st, ps, i);   // 逆順に作っても同じ
         for (i = 0; i < N; i++) {
           rep.checked++;
           if (sig(A[i]) !== sig(B[i])) rep.failures.push("2回の生成が不一致 st" + st + " " + ps + " i" + i);
           var bad = checkProblem(st, A[i]); if (bad.length) rep.failures.push("検査不合格 st" + st + " " + ps + " i" + i + ": " + bad[0]);
         }
-        [199, 57, 0, 120].forEach(function (k) {          // 後ろの番号から先に，単独で作る
+        [199, 57, 0, 120].forEach(function (k) {          // キャッシュを捨て，後ろの番号から先に作る
+          clearSeededCache();
           if (sig(genSeeded(st, ps, k)) !== sig(A[k])) rep.failures.push("単独生成が不一致 st" + st + " " + ps + " i" + k);
         });
+        for (i = 1; i < N; i++) if (A[i].qtext === A[i - 1].qtext) rep.failures.push("同じ問題が連続 st" + st + " " + ps + " i" + i);
       });
       for (var a = 0; a < passes.length; a++) for (var b = a + 1; b < passes.length; b++) {   // 別の合言葉
         var diff = 0;
@@ -565,7 +590,7 @@ var DrillCore = (function () {
     return report;
   }
 
-  return { setSeed: setSeed, gen: gen, genSeeded: genSeeded, determinismTest: determinismTest, checkProblem: checkProblem, modelHtml: modelHtml, parseTenths: parseTenths, fmt10: fmt10, selfTest: selfTest,
+  return { setSeed: setSeed, gen: gen, genSeeded: genSeeded, clearSeededCache: clearSeededCache, determinismTest: determinismTest, checkProblem: checkProblem, modelHtml: modelHtml, parseTenths: parseTenths, fmt10: fmt10, selfTest: selfTest,
            evalFormula: evalFormula, TEMPL: TEMPL };
 })();
 </script>
@@ -766,6 +791,7 @@ var DrillCore = (function () {
   }
   function normPass(v) { return String(v).replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }).replace(/\s/g, ""); }
   function bStart() {
+    if (B.cd || $("bSetup").hidden) return;   // カウントダウン中は無視（二重に走らせない）
     var ps = normPass($("bPass").value);
     if (!/^\d{4}$/.test(ps)) { var e = $("bErr"); e.textContent = "4桁の数字で入力しよう"; e.hidden = false; $("bPass").focus(); return; }
     B.pass = ps; B.i = 0; B.score = 0; B.ok = 0; B.ng = 0; B.locked = false;
@@ -798,11 +824,11 @@ var DrillCore = (function () {
     $("bQ").innerHTML = '<p class="qtext">' + B.p.qhtml + "</p>";
     $("bUnit").textContent = B.p.unit;
     var inp = $("bIn"); inp.value = ""; inp.focus({ preventScroll: true });
-    $("bFb").hidden = true;
+    $("bFb").className = "feedback off";
   }
   function bFb(cls, msg, ms) {
-    var f = $("bFb"); f.className = "feedback " + cls; f.textContent = msg; f.hidden = false;
-    clearTimeout(B.fl); if (ms) B.fl = setTimeout(function () { f.hidden = true; }, ms);
+    var f = $("bFb"); f.className = "feedback " + cls; f.textContent = msg;
+    clearTimeout(B.fl); if (ms) B.fl = setTimeout(function () { f.className = "feedback off"; }, ms);
   }
   function bAdvance() { if (!B.on || !B.p) return; B.i++; bShowQ(); }
   function bSubmit() {
@@ -825,6 +851,7 @@ var DrillCore = (function () {
     $("bResInfo").textContent = "合言葉 " + B.pass + "　" + NAMES[B.stage] + "　" + ROUND + " 秒";
     $("bResScore").textContent = B.score; $("bResOk").textContent = B.ok; $("bResNg").textContent = B.ng;
     bShow("bResult");
+    $("bAgain").focus();
   }
   $("battleBtn").addEventListener("click", enterBattle);
   $("bBack").addEventListener("click", leaveBattle);
