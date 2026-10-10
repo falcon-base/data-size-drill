@@ -344,7 +344,7 @@ var DrillCore = (function () {
         q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画（圧縮しない）を " + nm(t) + " 秒間記録した．データ量は何 " + u + " か．"; } }); }
   ];
 
-  /* ---- 第3段階：考査型の文章題 ---- */
+  /* ---- 第3段階：文章題 ---- */
   var S3 = [
     function () { var b = pick([8, 16, 16, 16]), ch = pick([1, 2, 2]), t = pick([1, 2, 4]);
       var lead = (b === 16 && ch === 2)
@@ -469,11 +469,11 @@ var DrillCore = (function () {
 (function () {
   if (typeof document === "undefined") return;
   var C = DrillCore;
-  var NAMES = { 1: "① 換算", 2: "② 立式", 3: "③ 考査型" };
+  var NAMES = { 1: "① 換算", 2: "② 立式", 3: "③ 文章題" };
   var TITLES = {
     1: "第1段階　換算（ビット・バイト・KB・MB・GB，時間，kHz）",
     2: "第2段階　立式（文字・音・静止画・動画のデータ量）",
-    3: "第3段階　考査型の文章題"
+    3: "第3段階　文章題"
   };
   var KEY = "dataSizeDrill.v1";
   var state = null, cur = null, nth = 0, lastText = null;
