@@ -466,9 +466,9 @@ var DrillCore = (function () {
         }
         return null; }),
       T("文字コード×ページ", function () {
-        var code = pick([["ASCII で表した半角英数字だけ", 8], ["Unicode で表した全角文字だけ", 16]]), r = pick([16, 32]), k = pick([32, 40, 64]), pg = pick([2, 4, 8, 16]);
-        return finishData(1, "", { units: ["KB", "B"], mult: [r, k, pg, code[1]], opts: { note: "文字数＝1 行の字数×行数×ページ数．ASCII は 1 文字 8 ビット，Unicode（全角）は 1 文字 16 ビットで数える．" },
-          q: function (u) { return "1 ページが " + nm(r) + " 行，1 行が " + nm(k) + " 文字の，" + code[0] + "の文書を " + nm(pg) + " ページ分保存する．データ量は何 " + u + " か．"; } }); })
+        var code = pick([["ASCII で表した半角英数字（1 文字 8 ビット）", 8, "ASCII の半角英数字は 1 文字 8 ビットで数える．"], ["1 文字 16 ビット（2 バイト）で表す全角文字", 16, "この全角文字は 1 文字 16 ビット（2 バイト）で数える．"]]), r = pick([16, 32]), k = pick([32, 40, 64]), pg = pick([2, 4, 8, 16]);
+        return finishData(1, "", { units: ["KB", "B"], mult: [r, k, pg, code[1]], opts: { note: "文字数＝1 行の字数×行数×ページ数．" + code[2] },
+          q: function (u) { return code[0] + "だけの文書がある．1 ページは " + nm(r) + " 行，1 行は " + nm(k) + " 文字．" + nm(pg) + " ページ分のデータ量は何 " + u + " か．"; } }); })
     ]
   };
 
@@ -479,7 +479,7 @@ var DrillCore = (function () {
           q: function (u) { return "量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + "，標本化周波数 " + nm(hz) + " Hz で " + nm(t) + " 秒間録音した音声（圧縮しない）のデータ量は何 " + u + " か．"; } }); }),
       T("モノラル／ステレオ", function () { var hz = pick(HZ), b = pick([8, 16]), st = pick([["モノラル（1 チャンネル）", 1], ["ステレオ（2 チャンネル）", 2]]), t = pick([2, 4, 8, 16]);
         return finishData(2, "", { units: ["KB", "MB"], mult: [b, st[1], hz, t], opts: { note: "モノラルは 1 チャンネル，ステレオは 2 チャンネル．" },
-          q: function (u) { return "標本化周波数 " + nm(hz) + " Hz，量子化ビット数 " + nm(b) + " ビットの" + st[0] + "の音声を " + nm(t) + " 秒間録音した（圧縮しない）．データ量は何 " + u + " か．"; } }); }),
+          q: function (u) { return "標本化周波数 " + nm(hz) + " Hz，量子化ビット数 " + nm(b) + " ビット，" + st[0] + "で " + nm(t) + " 秒間録音した音声（圧縮しない）のデータ量は何 " + u + " か．"; } }); }),
       T("長い録音（MB）", function () { var hz = pick(HZ), b = pick([8, 16]), ch = pick([1, 2]), t = pick([32, 64, 128]);
         return finishData(2, "", { units: ["MB"], mult: [b, ch, hz, t],
           q: function (u) { return "量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + "，標本化周波数 " + nm(hz) + " Hz で " + nm(t) + " 秒間録音した音声（圧縮しない）のデータ量は何 " + u + " か．"; } }); }),
@@ -522,16 +522,16 @@ var DrillCore = (function () {
       T("画素×画素数", function () { var b = pick([1, 8, 16, 24]), s = pick(SIZES);
         return finishData(3, "", { units: ["KB", "MB"], mult: [b, s[0], s[1]],
           q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの静止画（圧縮しない）のデータ量は何 " + u + " か．"; } }); }),
-      T("白黒・グレー・フルカラー", function () { var m = pick([[1, "白黒の 2 値画像（1 画素 1 ビット）"], [8, "グレースケール画像（1 画素 8 ビット）"], [24, "フルカラー画像（1 画素 24 ビット）"]]), s = pick(SIZES);
+      T("白黒・グレー・フルカラー", function () { var m = pick([[1, "白黒 2 値（1 画素 1 ビット）"], [8, "グレースケール（1 画素 8 ビット）"], [24, "フルカラー（1 画素 24 ビット）"]]), s = pick(SIZES);
         return finishData(3, "", { units: ["KB", "MB"], mult: [m[0], s[0], s[1]],
-          q: function (u) { return "解像度 " + nm(wh(s)) + " の" + m[1] + "を圧縮せずに保存する．データ量は何 " + u + " か．"; } }); }),
+          q: function (u) { return "解像度 " + nm(wh(s)) + " で，" + m[1] + "の画像を圧縮せずに保存する．データ量は何 " + u + " か．"; } }); }),
       T("大きな画像（MB）", function () { var b = pick([8, 16, 24]), s = pick(SIZES3);
         return finishData(3, "", { units: ["MB"], mult: [b, s[0], s[1]],
           q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの静止画（圧縮しない）のデータ量は何 " + u + " か．"; } }); })
     ],
     twist: [
-      T("色数→ビット", function () { var col = pick([[2, 1, "2 色（白黒の 2 値）"], [16, 4, "16 色"], [256, 8, "256 階調のグレースケール"], [65536, 16, "65536 色"], [16777216, 24, "16777216 色（フルカラー）"]]), s = pick(SIZES);
-        return finishData(3, "", { units: ["KB", "MB"], mult: [col[1], s[0], s[1]], opts: { note: "色数は 2 のべき乗．" + col[0] + " 色＝2<sup>" + col[1] + "</sup> 色なので，1 画素は " + col[1] + " ビット．" },
+      T("色数→ビット", function () { var col = pick([[2, 1, "2 色（白黒の 2 値）"], [16, 4, "16 色"], [256, 8, "256 階調のグレースケール", "階調"], [65536, 16, "65536 色"], [16777216, 24, "16777216 色（フルカラー）"]]), s = pick(SIZES);
+        return finishData(3, "", { units: ["KB", "MB"], mult: [col[1], s[0], s[1]], opts: { note: (col[3] || "色") + "数は 2 のべき乗．" + col[0] + " " + (col[3] || "色") + "＝2<sup>" + col[1] + "</sup> " + (col[3] || "色") + "なので，1 画素は " + col[1] + " ビット．" },
           q: function (u) { return "解像度 " + nm(wh(s)) + "，" + nm(col[2]) + "で表す静止画（圧縮しない）のデータ量は何 " + u + " か．"; } }); }),
       T("保存できる枚数", function () {
         var gb = pick([true, false]), cap = gb ? pick([1, 2, 4]) : pick([256, 512]), b = pick([8, 16]), s = pick(SIZES2);
