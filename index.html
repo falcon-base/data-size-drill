@@ -48,8 +48,8 @@
   .marker { background: linear-gradient(transparent 62%, var(--pen) 62%); padding: 0 0.1em; }
   .lede { margin: 0; color: var(--ink); font-weight: 700; }
 
-  .stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin: 0 0 1rem; padding: 0; list-style: none; }
-  @media (max-width: 40rem) { .stages { grid-template-columns: repeat(3, minmax(0, 1fr)); } .stagebtn { padding: 0.4rem 0.5rem; } }
+  .stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+  @media (max-width: 40rem) { .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stagebtn { padding: 0.4rem 0.5rem; } }
   .stagebtn { appearance: none; font: inherit; width: 100%; text-align: left; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.5rem 0.75rem; cursor: pointer; display: grid; gap: 0.1rem; min-height: 3.6rem; line-height: 1.4; }
   .stagebtn:hover { border-color: var(--leaf); }
   .stagebtn[aria-pressed="true"] { background: var(--leaf-deep); border-color: var(--leaf-deep); color: var(--sheet); }
@@ -114,14 +114,14 @@
   #bResH:focus, #bConfH:focus { outline: none; }
   body.bplay .masthead { display: none; }                       /* 対戦中は見出しをたたみ，問題と入力欄を画面に収める */
   #bFb.off { visibility: hidden; }
-  .bstages .chip { appearance: none; font: inherit; font-weight: 700; flex: 1 1 0; min-width: 0; min-height: 2.9rem; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.4rem 0.3rem; cursor: pointer; line-height: 1.3; white-space: nowrap; }
+  .bstages .chip { appearance: none; font: inherit; font-weight: 700; flex: 1 1 4.2rem; min-width: 0; min-height: 2.9rem; background: var(--sheet); color: var(--ink); border: 2px solid var(--leaf-line); border-radius: 12px; padding: 0.4rem 0.3rem; cursor: pointer; line-height: 1.3; white-space: nowrap; }
   .bstages .chip:hover { border-color: var(--leaf); }
   .bstages .chip[aria-pressed="true"] { background: var(--leaf-deep); border-color: var(--leaf-deep); color: var(--sheet); }
   .btn.pass { background: var(--pen); color: var(--ink); border: 2px solid var(--ink); margin-left: 0.8rem; min-width: 5.5rem; }
   .btn.pass:hover { background: var(--pen-soft); }
   .bview { display: grid; gap: 1rem; }
   .bview[hidden] { display: none; }
-  .bstages { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .bstages { display: grid; grid-template-columns: repeat(auto-fit, minmax(4.2rem, 1fr)); gap: 0.5rem; }
   .bbar { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
   .bbox { flex: 1 1 8rem; background: var(--paper); border-radius: 12px; padding: 0.3rem 1rem; display: grid; text-align: center; line-height: 1.2; }
   .bbox .bl { font-size: var(--step--1); color: var(--ink-soft); }
@@ -171,9 +171,9 @@
     <p class="lede">電卓なしで解ける数値だけが出ます．式は紙に書いて，答えだけ入力しよう</p>
   </header>
 
-  <div class="modebar" id="modebar"><button type="button" class="battlebtn" id="battleBtn">対戦<span>合言葉・3分．班のみんなで同じ合言葉・同じ段階を入れて，同時に開始します</span></button></div>
+  <div class="modebar" id="modebar"><button type="button" class="battlebtn" id="battleBtn">対戦<span>合言葉・3分．班のみんなで同じ合言葉・同じ種類を入れて，同時に開始します</span></button></div>
 
-  <ul class="stages" id="stages" aria-label="段階の選択"></ul>
+  <ul class="stages" id="stages" aria-label="種類の選択"></ul>
 
   <main class="panel" id="panel">
     <div class="panelhead">
@@ -221,12 +221,12 @@
   <section class="panel" id="battle" hidden aria-label="対戦">
     <div class="bview" id="bSetup">
       <h2>対戦　班の合言葉</h2>
-      <p style="margin:0">同じ合言葉・同じ段階なら，どの端末にも同じ問題が同じ順で出ます．班のみんなで同じ合言葉（数字4桁）と段階を入れて，同時に開始しよう．</p>
+      <p style="margin:0">同じ合言葉・同じ種類なら，どの端末にも同じ問題が同じ順で出ます．班のみんなで同じ合言葉（数字4桁）と種類を入れて，同時に開始しよう．</p>
       <div class="field"><label for="bPass">合言葉（数字4桁）</label><input id="bPass" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="例：0420"></div>
       <div>
-        <p class="small-label" style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">段階</p>
+        <p class="small-label" style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">種類</p>
         <div class="bstages" id="bStages"></div>
-        <p class="note" style="margin:0.4rem 0 0">ラウンド1＝① 換算，ラウンド2＝② 立式，ラウンド3＝③ 文章題 が目安．合言葉と段階は先生の画面で確かめよう．1ラウンドは 3 分．1回目で正解 +1，誤答 −1．</p>
+        <p class="note" style="margin:0.4rem 0 0">ふつうは「ミックス」（4 種類から出ます）．合言葉と種類は先生の画面で確かめよう．1ラウンドは 3 分．1回目で正解 +1，誤答 −1．</p>
       </div>
       <p class="feedback retry" id="bErr" role="alert" hidden></p>
       <div class="btnrow"><button type="button" class="btn" id="bStart">開始</button><button type="button" class="btn sub" id="bBack">メニューへ</button></div>
@@ -287,7 +287,7 @@
     <p class="note" id="tLs" style="margin:0" hidden>この端末では保存できません．再読み込みで消えます．</p>
     <div class="bview" id="tResult" hidden>
       <div class="tabs" id="tTabs" role="tablist" aria-label="ラウンド"></div>
-      <div><p style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">このラウンドの段階（全部の班で同じ）</p><div class="bstages" id="tStages"></div></div>
+      <div><p style="margin:0 0 0.3rem;font-size:var(--step--1);color:var(--ink-soft)">このラウンドの種類（全部の班で同じ）</p><div class="bstages" id="tStages"></div></div>
       <div class="tgroups" id="tGroups"></div>
       <p class="note" style="margin:0">合言葉は班の番号（A班＝1，…，I班＝9，J班＝0．11班以上は2桁）から始まり，班どうし・ラウンドどうしで重なりません．拠点は班の最小の出席番号の席です．順位点は紙で数えます．</p>
       <p class="note" style="margin:0">欠席・遅刻は班を作り直さず，人数を数え直す．2人以下になった班は他の班に入る（5人目．順位点は5〜1点）．</p>
@@ -314,7 +314,7 @@ var DrillCore = (function () {
     };
   }
   function setSeed(s) { rng = makeRng(s); }
-  function hashSeed(pass, stage, i) {                  // (合言葉, 段階, 問題番号) の混合ハッシュ（FNV-1a＋最終混ぜ）
+  function hashSeed(pass, stage, i) {                  // (合言葉, 種類, 問題番号) の混合ハッシュ（FNV-1a＋最終混ぜ）
     var str = "dsd1|" + pass + "|" + stage + "|" + i, h = 2166136261 >>> 0;
     for (var k = 0; k < str.length; k++) { h ^= str.charCodeAt(k); h = Math.imul(h, 16777619) >>> 0; }
     h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
@@ -328,7 +328,7 @@ var DrillCore = (function () {
     }
     return arr;
   }
-  var stats = { rejects: { 1: 0, 2: 0, 3: 0 } };
+  var stats = { rejects: { 1: 0, 2: 0, 3: 0, 4: 0 } };
 
   /* ---- 厳密な有理数（BigInt） ---- */
   function frac(x) {
@@ -398,7 +398,7 @@ var DrillCore = (function () {
     var minv = opts.min === undefined ? 1 : opts.min;
     var maxv = opts.max === undefined ? (UNIT_MAX[unit] || 5000) : opts.max;
     if (a10 < BigInt(Math.round(minv * 10)) || a10 > BigInt(maxv) * 10n) return null;
-    var oddCap = stage === 1 ? 10n ** 12n : (opts.maxOdd === undefined ? 99n : BigInt(opts.maxOdd));
+    var oddCap = opts.maxOdd === undefined ? 99n : BigInt(opts.maxOdd);
     if (strip2(r.n) > oddCap) return null;
     var ans10 = Number(a10);
     var ansStr = fmt10(ans10);
@@ -434,113 +434,133 @@ var DrillCore = (function () {
                { txt: "1 分間（＝60 秒）", v: 60 }, { txt: "2 分間（＝120 秒）", v: 120 }];
   function chname(ch) { return ch === 2 ? "2（ステレオ）" : "1（モノラル）"; }
 
-  /* ---- 第1段階：換算 ---- */
-  var S1 = [
-    function () { var b = 8 * pick([2, 3, 4, 5, 6, 8, 10, 12, 16, 24, 32, 64, 128, 256, 512]);
-      return mk(1, "bit→B", nm(b) + " ビットは何バイトか．", "バイト", [b], [8], { note: "1バイト＝8ビット．ビットからバイトへは ÷8．" }); },
-    function () { var b = pick([2, 3, 4, 5, 6, 8, 10, 12, 16, 32, 64, 128, 256]);
-      return mk(1, "B→bit", nm(b) + " バイトは何ビットか．", "ビット", [b, 8], [], { note: "バイトからビットへは ×8．" }); },
-    function () { var b = 512 * ri(1, 40);
-      return mk(1, "B→KB", nm(b) + " バイトは何 KB か．", "KB", [b], [1024], { note: "1KB＝1024バイト．バイトから KB へは ÷1024．" }); },
-    function () { var k = ri(1, 40) / 2;
-      return mk(1, "KB→B", nm(k) + " KB は何バイトか．", "バイト", [k, 1024], [], { max: 50000, note: "KB からバイトへは ×1024．" }); },
-    function () { var k = 512 * ri(1, 40);
-      return mk(1, "KB→MB", nm(k) + " KB は何 MB か．", "MB", [k], [1024], { note: "1MB＝1024KB．KB から MB へは ÷1024．" }); },
-    function () { var m = ri(1, 40) / 2;
-      return mk(1, "MB→KB", nm(m) + " MB は何 KB か．", "KB", [m, 1024], [], { max: 20000, note: "MB から KB へは ×1024．" }); },
-    function () { var m = 512 * ri(1, 40);
-      return mk(1, "MB→GB", nm(m) + " MB は何 GB か．", "GB", [m], [1024], { note: "1GB＝1024MB．MB から GB へは ÷1024．" }); },
-    function () { var g = ri(1, 40) / 2;
-      return mk(1, "GB→MB", nm(g) + " GB は何 MB か．", "MB", [g, 1024], [], { max: 20000, note: "GB から MB へは ×1024．" }); },
-    function () { var b = 4096 * ri(1, 24);
-      return mk(1, "bit→KB", nm(b) + " ビットは何 KB か．", "KB", [b], [8, 1024], { note: "ビット→バイト（÷8）→KB（÷1024）．" }); },
-    function () { var k = ri(1, 16) / 2;
-      return mk(1, "KB→bit", nm(k) + " KB は何ビットか．", "ビット", [k, 1024, 8], [], { max: 70000, note: "KB→バイト（×1024）→ビット（×8）．" }); },
-    function () { var m = ri(2, 30);
-      return mk(1, "分→秒", nm(m) + " 分は何秒か．", "秒", [m, 60], [], { max: 20000, note: "1分＝60秒．" }); },
-    function () { var h = ri(1, 4);
-      return mk(1, "時→秒", nm(h) + " 時間は何秒か．", "秒", [h, 3600], [], { max: 20000, note: "1時間＝3600秒（60×60）．" }); },
-    function () { var s = 30 * ri(2, 40);
-      return mk(1, "秒→分", nm(s) + " 秒は何分か．", "分", [s], [60], { note: "秒から分へは ÷60．" }); },
-    function () { var k = pick([8, 10.24, 16, 20.48, 22.05, 40.96, 44.1, 48]);
-      return mk(1, "kHz→Hz", nm(k) + " kHz は何 Hz か．", "Hz", [k, 1000], [], { max: 100000, note: "1kHz＝1000Hz．" }); },
-    function () { var h = pick([8000, 12000, 16000, 32000, 44100, 48000, 96000]);
-      return mk(1, "Hz→kHz", nm(h) + " Hz は何 kHz か．", "kHz", [h], [1000], { tenths: true, maxOdd: 100000, note: "Hz から kHz へは ÷1000．" }); }
-  ];
+  /* ---- 種類別の問題（1 文字／2 音／3 静止画／4 動画．5 ミックスは対戦用）----
+     各種類に「素直（要素がそのまま並ぶ）」と「ひとひねり」の型があり，約 6：4 で混ぜる． */
+  function T(kind, f) { return { kind: kind, f: f }; }
+  var HZ = [10240, 20480, 40960];
 
-  /* ---- 第2段階：立式 ---- */
-  var S2 = [
-    function () { var c = pick([256, 512, 768, 1024, 1536, 2048, 3072, 4096, 8192]), b = pick([8, 16]);
-      return finishData(2, "文字", { units: ["B", "KB"], mult: [c, b],
-        q: function (u) { return "1 文字を " + nm(b) + " ビットで表す．" + nm(c) + " 文字の文章のデータ量は何 " + u + " か．"; } }); },
-    function () { var hz = pick([10240, 20480, 40960]), b = pick([8, 16, 24]), ch = pick([1, 2]), t = pick(TIMES);
-      return finishData(2, "音", { units: ["KB", "MB"], mult: [b, ch, hz, t.v],
-        q: function (u) { return "量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + "，標本化周波数 " + nm(hz) + " Hz で " + t.txt + "録音した音声（圧縮しない）のデータ量は何 " + u + " か．"; } }); },
-    function () { var b = pick([1, 8, 16, 24]), s = pick(SIZES);
-      return finishData(2, "静止画", { units: ["KB", "MB"], mult: [b, s[0], s[1]],
-        q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの静止画（圧縮しない）のデータ量は何 " + u + " か．"; } }); },
-    function () { var b = pick([8, 16, 24]), s = pick(SIZES), f = pick([8, 15, 16, 24, 30]), t = pick([2, 4, 8, 16]);
-      return finishData(2, "動画", { units: ["MB", "GB"], mult: [b, s[0], s[1], f, t],
-        q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画（圧縮しない）を " + nm(t) + " 秒間記録した．データ量は何 " + u + " か．"; } }); }
-  ];
-
-  /* ---- 第3段階：文章題 ---- */
-  var S3 = [
-    function () { var b = pick([8, 16, 16, 16]), ch = pick([1, 2, 2]), t = pick([1, 2, 4]);
-      var lead = (b === 16 && ch === 2)
-        ? "CD の音質は，標本化周波数 " + nm(44100) + " Hz，量子化ビット数 " + nm(16) + " ビット，" + nm(2) + " チャンネル（ステレオ）である．"
-        : "標本化周波数 " + nm(44100) + " Hz（CD と同じ），量子化ビット数 " + nm(b) + " ビット，" + nm(ch) + " チャンネルで音声を記録する．";
-      return mk(3, "CD音質", lead + "この音声を " + nm(t) + " 秒間記録したときのデータ量は何バイトか．ただし圧縮しない．", "バイト",
-        [b, ch, 44100, t], [8], { max: 3000000, maxOdd: 20000, note: "44100 は 2 のべきで割り切れる形ではないので，答えの単位をバイトにしてある．先に 量子化ビット数×チャンネル数÷8 を整理すると楽（例：16×2÷8＝4）．" }); },
-    function () { var k = pick([10.24, 20.48, 40.96]), b = pick([8, 16, 24]), ch = pick([1, 2]), t = pick([2, 4, 8, 16]);
-      return finishData(3, "kHz指定の音", { units: ["KB", "MB"], mult: [b, ch, Math.round(k * 1000), t], opts: { note: "1kHz＝1000Hz．" + k + "×1000＝" + Math.round(k * 1000) + "（Hz）．式には Hz に直した値を使う．" },
-        q: function (u) { return "標本化周波数 " + nm(k + " kHz") + "，量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + " の音声を " + nm(t) + " 秒間記録した．データ量は何 " + u + " か．ただし圧縮しない．"; } }); },
-    function () {                                    // 逆算：データ量から時間
-      var hz = pick([20480, 40960]), b = pick([8, 16]), ch = pick([1, 2]), t = pick([2, 4, 8, 16, 32]);
-      var us = shuffle(["KB", "MB"]);
-      for (var i = 0; i < us.length; i++) {
-        var r = ratio([b, ch, hz, t], UD[us[i]]);
-        if (r.d === 1n && r.n >= 1n && r.n <= 5000n) {
-          var size = Number(r.n);
-          return mk(3, "逆算（時間）", "標本化周波数 " + nm(hz) + " Hz，量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + " で音声を記録したところ，データ量は " + nm(size + " " + us[i]) + " になった．記録した時間は何秒か．ただし圧縮しない．",
-            "秒", [size].concat(UP[us[i]]), [b, ch, hz], { note: "求めたいのは時間なので，データ量（ビット）＝量子化ビット数×チャンネル数×標本化周波数×時間 を逆に使う．データ量を先にビットに直す（×1024 や ×8）．" });
+  var CAT1 = {
+    plain: [
+      T("文字数×ビット", function () { var c = pick([256, 512, 768, 1024, 1536, 2048, 3072, 4096, 8192]), b = pick([8, 16]);
+        return finishData(1, "", { units: ["B", "KB"], mult: [c, b],
+          q: function (u) { return "1 文字を " + nm(b) + " ビットで表す．" + nm(c) + " 文字の文章のデータ量は何 " + u + " か．"; } }); })
+    ],
+    twist: [
+      T("ページ×行×字", function () { var r = pick([16, 32]), k = pick([32, 40, 64]), pg = pick([2, 4, 8, 16]), b = pick([8, 16]);
+        return finishData(1, "", { units: ["KB", "B"], mult: [r, k, pg, b], opts: { note: "文字数＝1 行の字数×行数×ページ数．" },
+          q: function (u) { return "1 ページが " + nm(r) + " 行，1 行が " + nm(k) + " 文字の文書がある．1 文字を " + nm(b) + " ビットで表すとき，" + nm(pg) + " ページ分のデータ量は何 " + u + " か．"; } }); }),
+      T("逆算（文字数）", function () {
+        var b = pick([8, 16]), c = pick([512, 1024, 1536, 2048, 3072, 4096, 8192]), us = shuffle(["KB", "B"]);
+        for (var i = 0; i < us.length; i++) {
+          var r = ratio([c, b], UD[us[i]]);
+          if ((r.d === 1n || r.d === 2n) && r.n >= 1n) {
+            var size = Number(r.n) / Number(r.d), lab = us[i] === "B" ? "バイト" : us[i];
+            return mk(1, "", "データ量が " + nm(size + " " + lab) + " の文章がある．1 文字を " + nm(b) + " ビットで表すとき，文字数は何文字か．", "文字",
+              [size].concat(UP[us[i]]), [b], { max: 100000, note: "求めたいのは文字数なので，データ量（ビット）＝文字数×1 文字のビット数 を逆に使う．データ量を先にビットに直す（×1024 や ×8）．" });
+          }
         }
-      }
-      return null; },
-    function () { var b = pick([8, 16, 24]), s = pick([[1024, 768], [2048, 1536], [2048, 1024], [1024, 512], [4096, 2048]]);
-      return finishData(3, "写真", { units: ["MB", "KB"], mult: [b, s[0], s[1]],
-        q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット" + (b === 24 ? "（フルカラー）" : "") + "の写真を圧縮せずに保存する．データ量は何 " + u + " か．"; } }); },
-    function () { var b = pick([8, 16, 24]), s = pick(SIZES);
-      return finishData(3, "1フレーム", { units: ["KB", "MB"], mult: [b, s[0], s[1]],
-        q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの動画がある．この動画の 1 フレームのデータ量は何 " + u + " か．"; } }); },
-    function () { var b = pick([8, 16, 24]), s = pick(SIZES), f = pick([8, 15, 16, 24, 30]), t = pick([2, 4, 8, 16]);
-      return finishData(3, "動画", { units: ["MB", "GB"], mult: [b, s[0], s[1], f, t],
-        q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画を " + nm(t) + " 秒間撮影した．圧縮しないときのデータ量は何 " + u + " か．"; } }); },
-    function () { var b = pick([1, 8, 16]), s = pick(SIZES2), f = pick([8, 16, 24, 30]), m = pick([1, 2, 4]);
-      return finishData(3, "映画の予告編", { units: ["MB", "GB"], mult: [b, s[0], s[1], f].concat(m === 1 ? [60] : [m, 60]), opts: { note: "1分＝60秒．分は ×60 で秒に直してから式に入れる．" },
-        q: function (u) { return "映画の予告編（" + nm(m + " 分") + "）を，解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps で圧縮せずに保存する．データ量は何 " + u + " か．"; } }); },
-    function () {                                    // 保存できる枚数
-      var gb = pick([true, false]), cap = gb ? pick([1, 2, 4]) : pick([256, 512]);
-      var b = pick([8, 16]), s = pick(SIZES2);
-      var up = gb ? [cap, 1024, 1024, 1024, 8] : [cap, 1024, 1024, 8];
-      return mk(3, "保存できる枚数", "容量 " + nm(cap + (gb ? " GB" : " MB")) + " の記録媒体に，解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの画像（圧縮しない）を保存する．何枚保存できるか．",
-        "枚", up, [b, s[0], s[1]], { min: 2, max: 40000, maxOdd: 1, note: "容量をビットに直し（×1024 や ×8），画像 1 枚のビット数（1 画素のビット数×横×縦）でわる．" }); }
-  ];
+        return null; })
+    ]
+  };
 
-  var TEMPL = { 1: S1, 2: S2, 3: S3 };
-  function gen(stage, lastText) {
-    var T = TEMPL[stage];
+  var CAT2 = {
+    plain: [
+      T("音（秒）", function () { var hz = pick(HZ), b = pick([8, 16, 24]), ch = pick([1, 2]), t = pick([2, 4, 8, 16]);
+        return finishData(2, "", { units: ["KB", "MB"], mult: [b, ch, hz, t],
+          q: function (u) { return "量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + "，標本化周波数 " + nm(hz) + " Hz で " + nm(t) + " 秒間録音した音声（圧縮しない）のデータ量は何 " + u + " か．"; } }); })
+    ],
+    twist: [
+      T("kHz→Hz", function () { var k = pick([10.24, 20.48, 40.96]), b = pick([8, 16, 24]), ch = pick([1, 2]), t = pick([2, 4, 8, 16]);
+        return finishData(2, "", { units: ["KB", "MB"], mult: [b, ch, Math.round(k * 1000), t], opts: { note: "1kHz＝1000Hz．" + k + "×1000＝" + Math.round(k * 1000) + "（Hz）．式には Hz に直した値を使う．" },
+          q: function (u) { return "標本化周波数 " + nm(k + " kHz") + "，量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + " の音声を " + nm(t) + " 秒間記録した．データ量は何 " + u + " か．ただし圧縮しない．"; } }); }),
+      T("分→秒", function () { var hz = pick(HZ), b = pick([8, 16]), ch = pick([1, 2]), m = pick([1, 2, 4]);
+        return finishData(2, "", { units: ["KB", "MB"], mult: [b, ch, hz, m, 60], opts: { note: "1分＝60秒．分は ×60 で秒に直してから式に入れる．" },
+          q: function (u) { return "標本化周波数 " + nm(hz) + " Hz，量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + " の音声を " + nm(m + " 分間") + "録音した．データ量は何 " + u + " か．ただし圧縮しない．"; } }); }),
+      T("CD音質", function () { var b = pick([8, 16, 16, 16]), ch = pick([1, 2, 2]), t = pick([1, 2, 4]);
+        var lead = (b === 16 && ch === 2)
+          ? "CD の音質は，標本化周波数 " + nm(44100) + " Hz，量子化ビット数 " + nm(16) + " ビット，" + nm(2) + " チャンネル（ステレオ）である．"
+          : "標本化周波数 " + nm(44100) + " Hz（CD と同じ），量子化ビット数 " + nm(b) + " ビット，" + nm(ch) + " チャンネルで音声を記録する．";
+        return mk(2, "", lead + "この音声を " + nm(t) + " 秒間記録したときのデータ量は何バイトか．ただし圧縮しない．", "バイト",
+          [b, ch, 44100, t], [8], { max: 3000000, maxOdd: 20000, note: "44100 は 2 のべきで割り切れる形ではないので，答えの単位をバイトにしてある．先に 量子化ビット数×チャンネル数÷8 を整理すると楽（例：16×2÷8＝4）．" }); }),
+      T("逆算（時間）", function () {
+        var hz = pick([20480, 40960]), b = pick([8, 16]), ch = pick([1, 2]), t = pick([2, 4, 8, 16, 32]), us = shuffle(["KB", "MB"]);
+        for (var i = 0; i < us.length; i++) {
+          var r = ratio([b, ch, hz, t], UD[us[i]]);
+          if (r.d === 1n && r.n >= 1n && r.n <= 5000n) {
+            var size = Number(r.n);
+            return mk(2, "", "標本化周波数 " + nm(hz) + " Hz，量子化ビット数 " + nm(b) + " ビット，チャンネル数 " + nm(ch) + " で音声を記録したところ，データ量は " + nm(size + " " + us[i]) + " になった．記録した時間は何秒か．ただし圧縮しない．",
+              "秒", [size].concat(UP[us[i]]), [b, ch, hz], { note: "求めたいのは時間なので，データ量（ビット）＝量子化ビット数×チャンネル数×標本化周波数×時間 を逆に使う．データ量を先にビットに直す（×1024 や ×8）．" });
+          }
+        }
+        return null; })
+    ]
+  };
+
+  var CAT3 = {
+    plain: [
+      T("画素×画素数", function () { var b = pick([1, 8, 16, 24]), s = pick(SIZES);
+        return finishData(3, "", { units: ["KB", "MB"], mult: [b, s[0], s[1]],
+          q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの静止画（圧縮しない）のデータ量は何 " + u + " か．"; } }); })
+    ],
+    twist: [
+      T("色数→ビット", function () { var col = pick([[2, 1], [16, 4], [256, 8], [65536, 16], [16777216, 24]]), s = pick(SIZES);
+        return finishData(3, "", { units: ["KB", "MB"], mult: [col[1], s[0], s[1]], opts: { note: "色数は 2 のべき乗．" + col[0] + " 色＝2<sup>" + col[1] + "</sup> 色なので，1 画素は " + col[1] + " ビット．" },
+          q: function (u) { return "解像度 " + nm(wh(s)) + "，" + nm(col[0] + " 色") + " で表す静止画（圧縮しない）のデータ量は何 " + u + " か．"; } }); }),
+      T("保存できる枚数", function () {
+        var gb = pick([true, false]), cap = gb ? pick([1, 2, 4]) : pick([256, 512]), b = pick([8, 16]), s = pick(SIZES2);
+        var up = gb ? [cap, 1024, 1024, 1024, 8] : [cap, 1024, 1024, 8];
+        return mk(3, "", "容量 " + nm(cap + (gb ? " GB" : " MB")) + " の記録媒体に，解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの画像（圧縮しない）を保存する．何枚保存できるか．",
+          "枚", up, [b, s[0], s[1]], { min: 2, max: 40000, maxOdd: 1, note: "容量をビットに直し（×1024 や ×8），画像 1 枚のビット数（1 画素のビット数×横×縦）でわる．" }); })
+    ]
+  };
+
+  var CAT4 = {
+    plain: [
+      T("動画（秒）", function () { var b = pick([8, 16, 24]), s = pick(SIZES), f = pick([8, 15, 16, 24, 30]), t = pick([2, 4, 8, 16]);
+        return finishData(4, "", { units: ["MB", "GB"], mult: [b, s[0], s[1], f, t],
+          q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画（圧縮しない）を " + nm(t) + " 秒間記録した．データ量は何 " + u + " か．"; } }); }),
+      T("1フレーム", function () { var b = pick([8, 16, 24]), s = pick(SIZES);
+        return finishData(4, "", { units: ["KB", "MB"], mult: [b, s[0], s[1]],
+          q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの動画がある．この動画の 1 フレームのデータ量は何 " + u + " か．"; } }); })
+    ],
+    twist: [
+      T("1フレーム→動画", function () {
+        var b = pick([8, 16, 24]), s = pick(SIZES), f = pick([8, 15, 16, 24, 30]), t = pick([2, 4, 8]);
+        var r = ratio([b, s[0], s[1]], [8, 1024, 1024]);
+        if (!((r.d === 1n || r.d === 2n) && r.n >= 1n)) return null;
+        var F = Number(r.n) / Number(r.d), us = shuffle(["MB", "GB"]);
+        for (var i = 0; i < us.length; i++) {
+          var p = mk(4, "", "1 フレームのデータ量が " + nm(F + " MB") + " の動画がある．フレームレートは " + nm(f) + " fps で，" + nm(t) + " 秒間の動画（圧縮しない）のデータ量は何 " + us[i] + " か．",
+            us[i], [F, f, t], us[i] === "GB" ? [1024] : [], { note: "フレーム数＝フレームレート×時間（秒）．1 フレームの MB にフレーム数をかける．" });
+          if (p) return p;
+        }
+        return null; }),
+      T("映画の予告編", function () { var b = pick([1, 8, 16]), s = pick(SIZES2), f = pick([8, 16, 24, 30]), m = pick([1, 2, 4]);
+        return finishData(4, "", { units: ["MB", "GB"], mult: [b, s[0], s[1], f].concat(m === 1 ? [60] : [m, 60]), opts: { note: "1分＝60秒．分は ×60 で秒に直してから式に入れる．" },
+          q: function (u) { return "映画の予告編（" + nm(m + " 分") + "）を，解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps で圧縮せずに保存する．データ量は何 " + u + " か．"; } }); }),
+      T("逆算（fps）", function () { var F = pick([1, 2, 3, 4, 6]), f = pick([8, 15, 16, 24, 30]), t = pick([2, 4, 8, 10]);
+        return mk(4, "", "1 フレームのデータ量が " + nm(F + " MB") + " の動画を " + nm(t + " 秒間") + "記録したところ，データ量は " + nm(F * f * t + " MB") + " になった．フレームレートは何 fps か．",
+          "fps", [F * f * t], [F, t], { note: "データ量＝1 フレームのデータ量×フレームレート×時間（秒）．求めたいのはフレームレートなので，データ量を 1 フレームのデータ量と時間でわる．" }); })
+    ]
+  };
+
+  var TEMPL = { 1: CAT1, 2: CAT2, 3: CAT3, 4: CAT4 };
+  var TWIST_RATE = 0.4;
+  function gen(cat, lastText) {
+    if (cat === 5) cat = pick([1, 2, 3, 4]);                 // ミックス：問題ごとに種類を選ぶ（種つき乱数の中で決まる）
+    var twist = rng() < TWIST_RATE, pool = twist ? TEMPL[cat].twist : TEMPL[cat].plain;
     for (var tries = 0; tries < 200; tries++) {
-      var p = pick(T)();
-      if (!p) { stats.rejects[stage]++; continue; }
+      var tpl = pick(pool), p = tpl.f();
+      if (!p) { stats.rejects[cat]++; continue; }
       if (lastText && p.qtext === lastText && tries < 50) continue;
+      p.kind = tpl.kind; p.twist = twist; p.stage = cat;
       return p;
     }
-    throw new Error("問題を生成できない: 段階" + stage);
+    throw new Error("問題を生成できない: 種類" + cat);
   }
 
-  // 対戦用：問題 i は (合言葉, 段階, i) だけから決まる．捨てて引き直す乱数も同じ種つき乱数．
-  // 問題 i は (合言葉, 段階, i) の種で作る．直前（引き直し後の i−1 番）と問題文が同じなら，副種 (…, i, r) で引き直す（決定的）．
+  // 対戦用：問題 i は (合言葉, 種類, i) だけから決まる．捨てて引き直す乱数も同じ種つき乱数．
+  // 問題 i は (合言葉, 種類, i) の種で作る．直前（引き直し後の i−1 番）と問題文が同じなら，副種 (…, i, r) で引き直す（決定的）．
   // 並びの先頭から順に作ってキャッシュする（どの順に呼んでも同じ結果）．
   var seededCache = { key: null, list: [], redrawn: 0 };
   function genOne(stage, pass, tag) {
@@ -596,22 +616,22 @@ var DrillCore = (function () {
     var bad = [];
     p.inputs.forEach(function (inp) {
       if (!Number.isSafeInteger(inp.ans10) || inp.ans10 <= 0) bad.push("答えが正の整数(×10)でない");
-      if (inp.ans10 % 5 !== 0 && p.kind !== "Hz→kHz") bad.push("整数かx.5でない");
+      if (inp.ans10 % 5 !== 0) bad.push("整数かx.5でない");
     });
     if (!evalFormula(p.formula)) bad.push("模範の式が成り立たない: " + p.formula);
     if (p.formula.split("＝")[1] !== fmt10(p.inputs[0].ans10)) bad.push("式の右辺と答えが不一致");
     if (!p.explOk) bad.push("2のべき説明の検算が不一致");
-    if (["バイト", "ビット", "KB", "MB", "GB", "秒", "分", "Hz", "kHz", "枚"].indexOf(p.unit) < 0) bad.push("単位が不正: " + p.unit);
-    if (st >= 2 && p.kind !== "保存できる枚数" && p.kind !== "逆算（時間）" && p.qtext.indexOf(p.unit) < 0) bad.push("問題文に単位がない");
+    if (["バイト", "KB", "MB", "GB", "秒", "枚", "文字", "fps"].indexOf(p.unit) < 0) bad.push("単位が不正: " + p.unit);
+    if (p.qtext.indexOf(p.unit) < 0) bad.push("問題文に単位がない");
     if (/\.\d\d/.test(p.formula.split("＝")[1])) bad.push("答えが小数第2位以下");
     return bad;
   }
   function sig(p) { return JSON.stringify([p.qhtml, p.inputs, p.formula, p.expl, p.note, p.unit]); }
-  // 対戦の決定性：同じ種なら同じ問題列／問題 i は単独で作っても同じ／別の合言葉・段階なら別の列／全問が割り切れ検査を通る
+  // 対戦の決定性：同じ種なら同じ問題列／問題 i は単独で作っても同じ／別の合言葉・種類なら別の列／全問が割り切れ検査を通る
   function determinismTest() {
     var passes = ["0000", "1234", "9999", "2468", "0007", "5150"], N = 200;
     var rep = { passes: passes.length, perStage: N, checked: 0, failures: [], redrawn: 0 };
-    [1, 2, 3].forEach(function (st) {
+    [1, 2, 3, 4, 5].forEach(function (st) {
       passes.forEach(function (ps) {
         var A = [], B = [], i;
         clearSeededCache();
@@ -636,25 +656,34 @@ var DrillCore = (function () {
         if (diff < 40) rep.failures.push("別の合言葉で列が似ている st" + st + " " + passes[a] + "/" + passes[b] + " 違い" + diff + "/50");
       }
     });
-    [1, 2, 3].forEach(function (a) { [1, 2, 3].forEach(function (b) {        // 別の段階
+    [1, 2, 3, 4, 5].forEach(function (a) { [1, 2, 3, 4, 5].forEach(function (b) {        // 別の種類
       if (a >= b) return; var diff = 0;
       for (var k = 0; k < 50; k++) if (genSeeded(a, "1234", k).qtext !== genSeeded(b, "1234", k).qtext) diff++;
-      if (diff < 45) rep.failures.push("別の段階で列が似ている " + a + "/" + b + " 違い" + diff + "/50");
+      if (diff < 45) rep.failures.push("別の種類で列が似ている " + a + "/" + b + " 違い" + diff + "/50");
     }); });
     return rep;
   }
   function selfTest(nPer, seed) {
     if (seed !== undefined) setSeed(seed);
     var report = { n: nPer, perStage: {}, totalChecked: 0, totalFail: 0 };
-    [1, 2, 3].forEach(function (st) {
-      var rej0 = stats.rejects[st], fails = [], kinds = {}, last = null, nfail = 0;
+    var allKinds = {};                                     // 種類ごとの型の一覧（素直・ひとひねり）
+    [1, 2, 3, 4].forEach(function (c) { allKinds[c] = { plain: TEMPL[c].plain.map(function (t) { return t.kind; }), twist: TEMPL[c].twist.map(function (t) { return t.kind; }) }; });
+    [1, 2, 3, 4, 5].forEach(function (st) {
+      var rej0 = stats.rejects[1] + stats.rejects[2] + stats.rejects[3] + stats.rejects[4], fails = [], kinds = {}, last = null, nfail = 0, tw = 0, note = [];
       for (var i = 0; i < nPer; i++) {
-        var p = gen(st, last); last = p.qtext; kinds[p.kind] = (kinds[p.kind] || 0) + 1;
-        var bad = checkProblem(st, p);
+        var p = gen(st, last); last = p.qtext; var kk = p.stage + ":" + p.kind; kinds[kk] = (kinds[kk] || 0) + 1; if (p.twist) tw++;
+        var bad = checkProblem(p.stage, p);
+        if (st < 5 && p.stage !== st) bad.push("種類が違う");
         if (bad.length) { report.totalFail++; nfail++; if (fails.length < 5) fails.push({ q: p.qtext, why: bad }); }
         report.totalChecked++;
       }
-      report.perStage[st] = { generated: nPer, failures: nfail, rejectedCandidates: stats.rejects[st] - rej0, kinds: kinds, samples: fails };
+      var rate = tw / nPer;
+      if (nPer >= 1000 && (rate < 0.35 || rate > 0.45)) { report.totalFail++; note.push("ひとひねりの割合が範囲外 " + rate); }
+      var expect = [];
+      (st === 5 ? [1, 2, 3, 4] : [st]).forEach(function (c) { allKinds[c].plain.concat(allKinds[c].twist).forEach(function (k) { expect.push(c + ":" + k); }); });
+      var missing = expect.filter(function (k) { return !(kinds[k] >= Math.max(1, Math.floor(nPer * (st === 5 ? 0.003 : 0.01)))); });
+      if (missing.length) { report.totalFail++; note.push("出現が少ない型 " + missing.join(",")); }
+      report.perStage[st] = { generated: nPer, failures: nfail, twistRate: Math.round(rate * 1000) / 1000, kinds: kinds, missingKinds: missing, notes: note, samples: fails };
     });
     report.determinism = determinismTest();
     report.totalFail += report.determinism.failures.length;
@@ -755,18 +784,14 @@ var DrillCore = (function () {
 (function () {
   if (typeof document === "undefined") return;
   var C = DrillCore;
-  var NAMES = { 1: "① 換算", 2: "② 立式", 3: "③ 文章題" };
-  var TITLES = {
-    1: "第1段階　換算（ビット・バイト・KB・MB・GB，時間，kHz）",
-    2: "第2段階　立式（文字・音・静止画・動画のデータ量）",
-    3: "第3段階　文章題"
-  };
-  var KEY = "dataSizeDrill.v1";
+  var NAMES = { 1: "文字", 2: "音", 3: "静止画", 4: "動画", 5: "ミックス" };
+  var TITLES = { 1: "文字のデータ量", 2: "音のデータ量", 3: "静止画のデータ量", 4: "動画のデータ量" };
+  var KEY = "dataSizeDrill.v2";
   var state = null, cur = null, nth = 0, lastText = null;
 
   function blank() {
-    var s = { v: 1, stage: 1, pending: false, stages: {} };
-    for (var i = 1; i <= 3; i++) s.stages[i] = { tried: 0, ok1: 0, ok2: 0, streak: 0, cleared: false };
+    var s = { v: 2, stage: 1, pending: false, stages: {} };
+    for (var i = 1; i <= 4; i++) s.stages[i] = { tried: 0, ok1: 0, ok2: 0, streak: 0, cleared: false };
     return s;
   }
   function load() {
@@ -775,13 +800,13 @@ var DrillCore = (function () {
       var raw = window.localStorage.getItem(KEY);
       if (raw) {
         var o = JSON.parse(raw);
-        if (o && o.v === 1 && o.stages) {
-          for (var i = 1; i <= 3; i++) if (o.stages[i]) {
+        if (o && o.v === 2 && o.stages) {
+          for (var i = 1; i <= 4; i++) if (o.stages[i]) {
             var a = o.stages[i], t = s.stages[i];
             t.tried = Math.max(0, a.tried | 0); t.ok1 = Math.max(0, a.ok1 | 0); t.ok2 = Math.max(0, a.ok2 | 0); t.streak = Math.max(0, a.streak | 0); t.cleared = !!a.cleared;
           }
-          if (o.stage >= 1 && o.stage <= 3) s.stage = o.stage | 0;
-          if (o.pending && o.stage >= 1 && o.stage <= 3) s.stages[s.stage].streak = 0;   // 未回答のまま離れた問題は連続を切る
+          if (o.stage >= 1 && o.stage <= 4) s.stage = o.stage | 0;
+          if (o.pending && o.stage >= 1 && o.stage <= 4) s.stages[s.stage].streak = 0;   // 未回答のまま離れた問題は連続を切る
         }
       }
     } catch (e) { /* 使えなくても，その場限りで動く */ }
@@ -793,11 +818,11 @@ var DrillCore = (function () {
 
   function renderStages() {
     var ul = $("stages"); ul.innerHTML = "";
-    for (var i = 1; i <= 3; i++) {
+    for (var i = 1; i <= 4; i++) {
       var st = state.stages[i], li = document.createElement("li"), b = document.createElement("button");
       b.type = "button"; b.className = "stagebtn"; b.setAttribute("data-stage", i);
       b.setAttribute("aria-pressed", String(state.stage === i));
-      b.innerHTML = '<span class="nm">' + NAMES[i] + (st.cleared ? ' <span class="done">✓ クリア</span>' : "") + "</span>" +
+      b.innerHTML = '<span class="nm">' + NAMES[i] + (st.cleared ? ' <span class="done">✓</span>' : "") + "</span>" +
         '<span class="st"><span>正解 ' + (st.ok1 + st.ok2) + "</span> <span>／出題 " + st.tried + "</span></span>";
       b.addEventListener("click", function (e) { goStage(Number(e.currentTarget.getAttribute("data-stage"))); });
       li.appendChild(b); ul.appendChild(li);
@@ -828,11 +853,11 @@ var DrillCore = (function () {
     renderStages(); renderStreak();
     state.pending = true; save();
     var first = $("in0"); if (first) first.focus({ preventScroll: true });
-    if (mode === "stage") window.scrollTo(0, 0);                     // 段階を開いたら画面上端（冒頭の1行から）
+    if (mode === "stage") window.scrollTo(0, 0);                     // 種類を開いたら画面上端（冒頭の1行から）
     else if (mode === "next") document.querySelector(".qbox").scrollIntoView({ block: "start" });
   }
 
-  function allCleared() { for (var i = 1; i <= 3; i++) if (!state.stages[i].cleared) return false; return true; }
+  function allCleared() { for (var i = 1; i <= 4; i++) if (!state.stages[i].cleared) return false; return true; }
   function setFeedback(cls, msg) { var f = $("feedback"); f.className = "feedback " + cls; f.textContent = msg; show(f, true); }
 
   function finish(correct, first, p) {
@@ -846,16 +871,15 @@ var DrillCore = (function () {
     $("checkBtn").disabled = true;
     var ans = p.inputs.map(function (i) { return (p.inputs.length > 1 ? i.label + "＝" : "") + C.fmt10(i.ans10) + " " + i.unit; }).join("，");
     if (clearedNow) {
-      setFeedback("clear", allCleared() ? "3問連続正解．全段階クリア！　続けて練習もできます．" : "3問連続正解．第" + state.stage + "段階クリア！" + (state.stage < 3 ? "　次の段階へ進めます．" : ""));
+      setFeedback("clear", allCleared() ? "3問連続正解．全部クリア！　続けて練習もできます．" : "3問連続正解．「" + NAMES[state.stage] + "」クリア！　ほかの種類も選べます．");
     } else if (correct) {
       setFeedback("ok", first ? "正解！" : "正解（2回目）．連続正解は最初からやり直し．");
     } else {
       setFeedback("ng", "答えは " + ans + " でした．模範の式で確かめよう．");
     }
     var nb = $("nextBtn");
-    var goNext = clearedNow && state.stage < 3 && !allCleared();
-    nb.textContent = goNext ? "第" + (state.stage + 1) + "段階へ進む" : "次の問題へ";
-    nb.setAttribute("data-clear", goNext ? "1" : "");
+    nb.textContent = "次の問題へ";
+    nb.setAttribute("data-clear", "");
     show($("nextRow"), true);
     renderStages(); renderStreak();
     nb.focus();
@@ -914,14 +938,14 @@ var DrillCore = (function () {
   /* ---------- 対戦モード（班の合言葉）．個人練習の記録には触れない ---------- */
   var ROUND = 180;
   (function () { var m = /[?&]roundsec=(\d+)/.exec(window.location.search); if (m && +m[1] >= 3 && +m[1] <= 180) ROUND = +m[1]; })();
-  var B = { on: false, stage: 1, pass: "", i: 0, score: 0, ok: 0, ng: 0, pa: 0, endAt: 0, tick: null, cd: null, adv: null, fl: null, p: null, locked: false, endedAt: -1e9, confAt: 0 };
+  var B = { on: false, stage: 5, pass: "", i: 0, score: 0, ok: 0, ng: 0, pa: 0, endAt: 0, tick: null, cd: null, adv: null, fl: null, p: null, locked: false, endedAt: -1e9, confAt: 0 };
   var BV = ["bSetup", "bConfirm", "bCount", "bPlay", "bResult"];
   function bShow(id) { BV.forEach(function (x) { $(x).hidden = x !== id; }); document.body.classList.toggle("bplay", id === "bPlay"); if (id === "bPlay") window.scrollTo(0, 0); }
   function bStop() { clearInterval(B.tick); clearTimeout(B.cd); clearTimeout(B.adv); clearTimeout(B.fl); B.tick = B.cd = B.adv = B.fl = null; }
   function bNow() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
   function bStages() {
     var d = $("bStages"); d.innerHTML = "";
-    [1, 2, 3].forEach(function (n) {
+    [5, 1, 2, 3, 4].forEach(function (n) {
       var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = NAMES[n];
       b.setAttribute("aria-pressed", String(B.stage === n));
       b.addEventListener("click", function () { B.stage = n; bStages(); });
@@ -949,7 +973,7 @@ var DrillCore = (function () {
     var ps = normPass($("bPass").value);
     if (!/^\d{4}$/.test(ps)) { var e = $("bErr"); e.textContent = "4桁の数字で入力しよう"; e.hidden = false; $("bPass").focus(); return; }
     B.pass = ps; B.confAt = bNow();
-    $("bConfBig").innerHTML = "合言葉<b>" + ps + "</b>段階　" + NAMES[B.stage];
+    $("bConfBig").innerHTML = "合言葉<b>" + ps + "</b>種類　" + NAMES[B.stage];
     bShow("bConfirm"); $("bConfH").focus({ preventScroll: true });
   }
   function bGo() {
@@ -1040,7 +1064,7 @@ var DrillCore = (function () {
   /* ---------- 教員用：班分けと合言葉（番号だけ．localStorage に残す） ---------- */
   var TKEY = "dataSizeDrill.teacher.v1", BANDS = ["#1D5B41", "#2F5D8A", "#BD472C", "#7A5A12", "#6B4E9B", "#1F7A86"];
   var T = null, tRound = 0, tLsOk = true;
-  function tBlank() { return { N: 40, absent: [], groups: null, codes: null, stages: [1, 2, 3] }; }
+  function tBlank() { return { ver: 2, N: 40, absent: [], groups: null, codes: null, stages: [5, 5, 5] }; }
   function tLoad() {
     var t = tBlank();
     try {
@@ -1050,7 +1074,7 @@ var DrillCore = (function () {
         if (o && typeof o.N === "number" && o.N >= 6 && o.N <= 60) {
           t.N = o.N | 0;
           if (Array.isArray(o.absent)) t.absent = o.absent.filter(function (x) { return Number.isInteger(x) && x >= 1 && x <= t.N; });
-          if (Array.isArray(o.stages) && o.stages.length === 3) t.stages = o.stages.map(function (x) { return x >= 1 && x <= 3 ? x | 0 : 1; });
+          if (o.ver === 2 && Array.isArray(o.stages) && o.stages.length === 3) t.stages = o.stages.map(function (x) { return x >= 1 && x <= 5 ? x | 0 : 5; });   // 旧版（ver なし）は班と合言葉を残し，種類は「ミックス」
           var okG = Array.isArray(o.groups) && Array.isArray(o.codes) && o.codes.length === 3 && o.codes.every(function (r) { return Array.isArray(r) && r.length === o.groups.length; });
           if (okG && o.groups.every(function (g) { return g && typeof g.name === "string" && Array.isArray(g.nums); })) { t.groups = o.groups; t.codes = o.codes; }
         }
@@ -1088,7 +1112,7 @@ var DrillCore = (function () {
       tabs.appendChild(b);
     });
     var sd = $("tStages"); sd.innerHTML = "";
-    [1, 2, 3].forEach(function (n) {
+    [5, 1, 2, 3, 4].forEach(function (n) {
       var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = NAMES[n];
       b.setAttribute("aria-pressed", String(T.stages[tRound] === n));
       b.addEventListener("click", function () { T.stages[tRound] = n; tSave(); tRender(); });
