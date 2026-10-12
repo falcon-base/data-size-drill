@@ -466,7 +466,7 @@ var DrillCore = (function () {
         }
         return null; }),
       T("文字コード×ページ", function () {
-        var code = pick([["ASCII で表した半角英数字（1 文字 8 ビット）", 8, "ASCII の半角英数字は 1 文字 8 ビットで数える．"], ["1 文字 16 ビット（2 バイト）で表す全角文字", 16, "この全角文字は 1 文字 16 ビット（2 バイト）で数える．"]]), r = pick([16, 32]), k = pick([32, 40, 64]), pg = pick([2, 4, 8, 16]);
+        var code = pick([["半角英数字（1 文字 8 ビット）", 8, "半角英数字は 1 文字 8 ビットで数える．"], ["1 文字 16 ビット（2 バイト）で表す全角文字", 16, "この全角文字は 1 文字 16 ビット（2 バイト）で数える．"]]), r = pick([16, 32]), k = pick([32, 40, 64]), pg = pick([2, 4, 8, 16]);
         return finishData(1, "", { units: ["KB", "B"], mult: [r, k, pg, code[1]], opts: { note: "文字数＝1 行の字数×行数×ページ数．" + code[2] },
           q: function (u) { return code[0] + "だけの文書がある．1 ページは " + nm(r) + " 行，1 行は " + nm(k) + " 文字．" + nm(pg) + " ページ分のデータ量は何 " + u + " か．"; } }); })
     ]
@@ -548,8 +548,8 @@ var DrillCore = (function () {
         return finishData(4, "", { units: ["MB", "GB"], mult: [b, s[0], s[1], f, t],
           q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画（圧縮しない）を " + nm(t) + " 秒間記録した．データ量は何 " + u + " か．"; } }); }),
       T("1フレーム", function () { var b = pick([8, 16, 24]), s = pick(SIZES);
-        return finishData(4, "", { units: ["KB", "MB"], mult: [b, s[0], s[1]], opts: { note: "1 フレームのビット数＝1 画素のビット数×画素数．" },
-          q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの動画がある．この動画の 1 フレームのビット数は何 " + u + " か．"; } }); }),
+        return finishData(4, "", { units: ["KB", "MB"], mult: [b, s[0], s[1]], opts: { note: "まず 1 フレームのビット数（＝1 画素のビット数×画素数）を求め，÷8 などで答えの単位に直す．" },
+          q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビットの動画がある．この動画の 1 フレームのデータ量は何 " + u + " か．"; } }); }),
       T("長い動画（GB）", function () { var b = pick([8, 16, 24]), s = pick(SIZES), f = pick([8, 16, 24, 30]), t = pick([16, 32, 64]);
         return finishData(4, "", { units: ["GB"], mult: [b, s[0], s[1], f, t],
           q: function (u) { return "解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画（圧縮しない）を " + nm(t) + " 秒間記録した．データ量は何 " + u + " か．"; } }); }),
@@ -558,7 +558,7 @@ var DrillCore = (function () {
         if (F === null) return null;
         var us = shuffle(["MB", "GB"]);
         for (var i = 0; i < us.length; i++) {
-          var p = mk(4, "", "1 フレームのビット数が " + nm(F + " MB") + " の動画がある．フレームレートは " + nm(f) + " fps で，" + nm(t) + " 秒間の動画（圧縮しない）のデータ量は何 " + us[i] + " か．",
+          var p = mk(4, "", "1 フレームが " + nm(F + " MB") + " の動画がある．フレームレートは " + nm(f) + " fps で，" + nm(t) + " 秒間の動画（圧縮しない）のデータ量は何 " + us[i] + " か．",
             us[i], [F, f, t], us[i] === "GB" ? [1024] : [], { note: "フレーム数＝フレームレート×時間（秒）．1 フレームの MB にフレーム数をかける．" });
           if (p) return p;
         }
@@ -569,8 +569,8 @@ var DrillCore = (function () {
         return finishData(4, "", { units: ["MB", "GB"], mult: [b, s[0], s[1], f].concat(m === 1 ? [60] : [m, 60]), opts: { note: "1分＝60秒．分は ×60 で秒に直してから式に入れる．" },
           q: function (u) { return "映画の予告編（" + nm(m + " 分") + "）を，解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps で圧縮せずに保存する．データ量は何 " + u + " か．"; } }); }),
       T("逆算（fps）", function () { var F = pick([1, 2, 3, 4, 6]), f = pick([8, 15, 16, 24, 30]), t = pick([2, 4, 8, 10]);
-        return mk(4, "", "1 フレームのビット数が " + nm(F + " MB") + " の動画を " + nm(t + " 秒間") + "記録したところ，データ量は " + nm(F * f * t + " MB") + " になった．フレームレートは何 fps か．",
-          "fps", [F * f * t], [F, t], { note: "データ量＝1 フレームのビット数×フレームレート×時間（秒）．求めたいのはフレームレートなので，データ量を 1 フレームのビット数と時間でわる．" }); }),
+        return mk(4, "", "1 フレームが " + nm(F + " MB") + " の動画を " + nm(t + " 秒間") + "記録したところ，データ量は " + nm(F * f * t + " MB") + " になった．フレームレートは何 fps か．",
+          "fps", [F * f * t], [F, t], { note: "データ量＝1 フレームのデータ量×フレームレート×時間（秒）．求めたいのはフレームレートなので，データ量を 1 フレームのデータ量と時間でわる．" }); }),
       T("容量→時間", function () {
         var gb = pick([1, 2, 4]), b = pick([8, 16]), s = pick(SIZES2), f = pick([8, 16]);
         return mk(4, "", "容量 " + nm(gb + " GB") + " の記録媒体に，解像度 " + nm(wh(s)) + "，1 画素 " + nm(b) + " ビット，フレームレート " + nm(f) + " fps の動画（圧縮しない）を保存する．何秒ぶん保存できるか．",
