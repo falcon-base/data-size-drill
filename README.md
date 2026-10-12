@@ -1,5 +1,7 @@
 # データ量ドリル
 
+公開URL：https://falcon-base.github.io/data-size-drill/ （2026-10-13 公開．tkamiya-ssalesio への譲渡を申請中．承認後は https://tkamiya-ssalesio.github.io/data-size-drill/ ）．教員画面は `?teacher`．
+
 情報Ⅰ「情報のデジタル表現」第7回（データ量の計算）の乱数問題ドリル．紙のワークシートと併用する．単一の `index.html`．外部ライブラリ・外部通信なし．
 
 ## 生徒向け
